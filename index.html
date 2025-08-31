@@ -39,15 +39,22 @@
   .preview{min-height:48px;border-radius:10px;padding:12px;background:#0b0f1e;border:1px dashed #26304d}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
   .status{display:flex;gap:8px}
-  .status .keep{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3)}
-  .status .drop{background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.35)}
-  .pill{padding:6px 10px;border-radius:10px;font-size:12px;cursor:pointer;user-select:none}
+  .status button{transition:background .15s,color .15s}
+  .status .keep{color:var(--keep);background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4)}
+  .status .drop{color:var(--drop);background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.5)}
+  .status .keep[aria-pressed="true"]{background:var(--keep);color:#0b0c10}
+  .status .drop[aria-pressed="true"]{background:var(--drop);color:#0b0c10}
+  .pill{padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;user-select:none}
   .empty{padding:24px;text-align:center;color:var(--muted)}
   footer{padding:24px 16px;color:var(--muted);text-align:center}
   .accent{color:var(--accent)}
   .danger{color:#ff8b8b}
   .ok{color:#6ff7a8}
   details summary{cursor:pointer;opacity:.9}
+  .flash-keep{animation:flashKeep .6s;}
+  .flash-drop{animation:flashDrop .6s;}
+  @keyframes flashKeep{from{background:rgba(46,204,113,.2);}to{background:#0e1120;}}
+  @keyframes flashDrop{from{background:rgba(255,107,107,.2);}to{background:#0e1120;}}
   .sr{position:absolute;left:-9999px}
 </style>
 </head>
@@ -451,17 +458,34 @@
 
     // Button handlers
     const [keepBtn, dropBtn] = title.querySelectorAll('button');
+    function afterDecision() {
+      if (state.filter !== 'all') {
+        const d = state.decisions[k];
+        const match = (state.filter === 'keep' && d === 'keep') ||
+          (state.filter === 'drop' && d === 'drop') ||
+          (state.filter === 'undecided' && d !== 'keep' && d !== 'drop');
+        if (!match) applyFilterAndRender(true);
+      }
+    }
     keepBtn.addEventListener('click', () => {
       state.decisions[k] = 'keep';
       saveDecisions();
       keepBtn.setAttribute('aria-pressed', 'true');
       dropBtn.setAttribute('aria-pressed', 'false');
+      status(`${face.family} を要るにしたの`);
+      card.classList.remove('flash-drop');
+      card.classList.add('flash-keep');
+      setTimeout(() => { card.classList.remove('flash-keep'); afterDecision(); }, 200);
     });
     dropBtn.addEventListener('click', () => {
       state.decisions[k] = 'drop';
       saveDecisions();
       keepBtn.setAttribute('aria-pressed', 'false');
       dropBtn.setAttribute('aria-pressed', 'true');
+      status(`${face.family} を要らないにしたの`);
+      card.classList.remove('flash-keep');
+      card.classList.add('flash-drop');
+      setTimeout(() => { card.classList.remove('flash-drop'); afterDecision(); }, 200);
     });
 
     if (d === 'keep') keepBtn.setAttribute('aria-pressed', 'true');
