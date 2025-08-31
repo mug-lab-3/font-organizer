@@ -62,7 +62,7 @@
   <header>
     <div class="wrap">
       <h1>Local Font Organizer <span class="accent">β</span></h1>
-      <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで使えるフォント整理アプリなのよ。最初に権限を許可してね。</div>
+      <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで利用できるフォント整理アプリです。最初に権限を許可してください。</div>
     </div>
   </header>
 
@@ -87,15 +87,15 @@
             <select id="filter">
               <option value="all">すべて</option>
               <option value="undecided">未決</option>
-              <option value="keep">要るだけ</option>
-              <option value="drop">要らないだけ</option>
+              <option value="keep">必要のみ</option>
+              <option value="drop">不要のみ</option>
             </select>
           </div>
         </div>
 
         <div class="toolbar">
           <button id="load" class="btn primary">🔎 ローカルフォントを読み込む</button>
-          <button id="export" class="btn">💾 要る一覧をダウンロード</button>
+          <button id="export" class="btn">💾 必要なフォント一覧をダウンロード</button>
           <button id="import" class="btn ghost">📥 インポート</button>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
@@ -124,9 +124,9 @@
       <details style="margin-top:12px;">
         <summary>動作メモ</summary>
         <div class="hint">
-          ・対応ブラウザで <b>local-fonts 権限</b> を許可すると一覧を取得できるの。<br/>
-          ・Firefox / Safari では列挙できないから、代わりに案内を出すのなの。<br/>
-          ・仕分け結果はローカルストレージに自動保存するよ。
+          ・対応ブラウザで <b>local-fonts 権限</b> を許可すると一覧を取得できます。<br/>
+          ・Firefox / Safari では列挙できないため、代替の案内を表示します。<br/>
+          ・仕分け結果はローカルストレージに自動保存されます。
         </div>
       </details>
 
@@ -137,7 +137,7 @@
   </main>
 
   <footer>
-    <small>Made with ♥ — このページは完全オフラインで動くの。権限はブラウザ側で管理されるよ。</small>
+    <small>Made with ♥ — このページは完全にオフラインで動作します。権限はブラウザ側で管理されます。</small>
   </footer>
 
 <script>
@@ -209,8 +209,8 @@
   lazyChk.addEventListener('change', () => { state.lazy = lazyChk.checked; applyFilterAndRender(true); });
   exportModeSel.addEventListener('change', () => { state.exportMode = exportModeSel.value; });
 
-  resetBtn.addEventListener('click', () => {
-    if (!confirm('仕分け結果をすべてリセットするの？')) return;
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('仕分け結果をすべてリセットしますか？')) return;
     state.decisions = {};
     saveDecisions();
     applyFilterAndRender(false);
@@ -232,8 +232,8 @@
         matched++;
       }
     }
-    saveDecisions();
-    alert(`読み込み完了: ${matched} 件を「要る」に設定したの`);
+      saveDecisions();
+      alert(`読み込み完了: ${matched} 件を「必要」に設定しました`);
     applyFilterAndRender(false);
     fileInput.value = '';
   });
@@ -281,7 +281,7 @@
   async function loadFonts() {
     listEl.innerHTML = '';
     endEl.textContent = '';
-    status('ローカルフォントの列挙を開始するの…');
+      status('ローカルフォントの列挙を開始します…');
 
     // Try permission hint (optional)
     try {
@@ -290,7 +290,7 @@
         // @ts-ignore
         const p = await navigator.permissions.query({name:'local-fonts'});
         if (p && p.state === 'denied') {
-          status('権限が拒否されてるの。アドレスバー左のアイコンから許可してね。', true);
+            status('権限が拒否されています。アドレスバー左のアイコンから許可してください。', true);
         }
       }
     } catch {}
@@ -311,8 +311,8 @@
         return;
       }
     } catch (e) {
-      console.error(e);
-      status('権限が許可されなかったか、ポリシーでブロックされてるの。Chrome設定を確認してね。', true);
+        console.error(e);
+        status('権限が許可されなかったか、ポリシーでブロックされています。Chromeの設定を確認してください。', true);
       return;
     }
 
@@ -321,7 +321,7 @@
       .map(f => ({ family: f.family, fullName: f.fullName || '', postscriptName: f.postscriptName || '', style: f.style || '' }))
       .sort((a,b)=> a.family.localeCompare(b.family,'ja') || (a.fullName||'').localeCompare(b.fullName||'','ja'));
 
-    status(`読み込み完了: ${state.fonts.length} フォントフェイスを取得したの`);
+      status(`読み込み完了: ${state.fonts.length} フォントフェイスを取得しました`);
     applyFilterAndRender(true);
   }
 
@@ -329,11 +329,11 @@
     statusEl.innerHTML = '';
     listEl.innerHTML = `
       <div class="empty">
-        <div class="danger">このブラウザではインストールフォントの列挙ができないの…</div>
-        <div class="hint" style="margin-top:8px">
-          Chrome または Microsoft Edge の最新バージョンで開いて、<br/>
-          「ローカルフォントへのアクセス」を許可してね。
-        </div>
+          <div class="danger">このブラウザではインストールフォントの列挙ができません。</div>
+          <div class="hint" style="margin-top:8px">
+            Chrome または Microsoft Edge の最新バージョンで開き、<br/>
+            「ローカルフォントへのアクセス」を許可してください。
+          </div>
       </div>`;
   }
 
@@ -385,7 +385,7 @@
   function renderPage(reset) {
     if (reset) listEl.innerHTML = '';
     if (!state.filtered.length) {
-      endEl.textContent = '該当なしなの…';
+        endEl.textContent = '該当する項目はありません。';
       return;
     } else {
       endEl.textContent = '';
@@ -409,7 +409,7 @@
             state.page++;
             renderPage(false);
           } else {
-            endEl.textContent = 'おしまいなの';
+              endEl.textContent = 'これ以上ありません。';
           }
         }
       }, {rootMargin: '800px 0px'});
@@ -423,7 +423,7 @@
         state.page++;
         renderPage(false);
       }
-      endEl.textContent = 'おしまいなの';
+        endEl.textContent = 'これ以上ありません。';
     }
 
     refreshSamples();
@@ -445,8 +445,8 @@
         ${face.style ? ` <span class="tag">${escapeHtml(face.style)}</span>` : ''}
       </div>
       <div class="status">
-        <button class="pill keep" aria-pressed="${d==='keep'}">要る</button>
-        <button class="pill drop" aria-pressed="${d==='drop'}">要らない</button>
+          <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
+          <button class="pill drop" aria-pressed="${d==='drop'}">不要</button>
       </div>
     `;
     const preview = document.createElement('div');
@@ -472,7 +472,7 @@
       saveDecisions();
       keepBtn.setAttribute('aria-pressed', 'true');
       dropBtn.setAttribute('aria-pressed', 'false');
-      status(`${face.family} を要るにしたの`);
+        status(`${face.family} を必要に設定しました`);
       card.classList.remove('flash-drop');
       card.classList.add('flash-keep');
       setTimeout(() => { card.classList.remove('flash-keep'); afterDecision(); }, 200);
@@ -482,7 +482,7 @@
       saveDecisions();
       keepBtn.setAttribute('aria-pressed', 'false');
       dropBtn.setAttribute('aria-pressed', 'true');
-      status(`${face.family} を要らないにしたの`);
+        status(`${face.family} を不要に設定しました`);
       card.classList.remove('flash-keep');
       card.classList.add('flash-drop');
       setTimeout(() => { card.classList.remove('flash-drop'); afterDecision(); }, 200);
@@ -541,7 +541,7 @@
     if (!state.supported.queryLocalFonts && !state.supported.navFontsQuery) {
       unsupportedMessage();
     } else {
-      status('準備OK。左上の「ローカルフォントを読み込む」を押してね。');
+        status('準備が整いました。左上の「ローカルフォントを読み込む」を選択してください。');
     }
   })();
 })();
