@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Local Font Organizer — 1ファイル版</title>
+<style>
+  :root {
+    --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --accent:#65c3ff;
+    --keep:#2ecc71; --drop:#ff6b6b; --chip:#222735;
+  }
+  html,body{height:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter: blur(6px);}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px;}
+  .bar{display:grid;gap:10px;grid-template-columns: 1fr; }
+  @media(min-width:900px){ .bar{grid-template-columns: 1fr auto auto auto; align-items:end;} }
+  h1{margin:0 0 8px;font-size:20px;letter-spacing:.3px}
+  .hint{color:var(--muted);font-size:12px;margin-top:4px}
+  .panel{background:var(--panel);border-radius:16px;padding:14px;box-shadow: 0 8px 24px rgba(0,0,0,.25);}
+  .controls{display:grid;gap:12px;grid-template-columns: 1fr;}
+  @media(min-width:900px){ .controls{grid-template-columns: 1fr 200px 220px 200px;align-items:end;} }
+  label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+  input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none}
+  input[type="range"]{width:100%}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#1f2433;color:var(--ink);cursor:pointer}
+  .btn.primary{background:var(--accent);color:#072233;font-weight:700}
+  .btn.ghost{background:transparent;outline:1px solid #2a3040}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--chip);padding:6px 10px;border-radius:999px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
+  .chip input{margin:0}
+  .list{margin-top:14px;display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:700px){ .list{grid-template-columns:1fr 1fr} }
+  .card{background:#0e1120;border:1px solid #1f2740;border-radius:16px;padding:14px;display:grid;gap:10px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{font-size:12px;background:#12172a;border:1px solid #1e2540;padding:2px 8px;border-radius:999px;color:var(--muted)}
+  .preview{min-height:48px;border-radius:10px;padding:12px;background:#0b0f1e;border:1px dashed #26304d}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+  .status{display:flex;gap:8px}
+  .status .keep{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3)}
+  .status .drop{background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.35)}
+  .pill{padding:6px 10px;border-radius:10px;font-size:12px;cursor:pointer;user-select:none}
+  .empty{padding:24px;text-align:center;color:var(--muted)}
+  footer{padding:24px 16px;color:var(--muted);text-align:center}
+  .accent{color:var(--accent)}
+  .danger{color:#ff8b8b}
+  .ok{color:#6ff7a8}
+  details summary{cursor:pointer;opacity:.9}
+  .sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Local Font Organizer <span class="accent">β</span></h1>
+      <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで使えるフォント整理アプリなのよ。最初に権限を許可してね。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <div class="bar">
+        <div class="controls">
+          <div>
+            <label class="small">検索（ファミリ名・PostScript・フルネーム）</label>
+            <input id="q" type="text" placeholder="例: Noto, Yu Gothic, meiryo" />
+          </div>
+          <div>
+            <label class="small">プレビュー文字</label>
+            <input id="sample" type="text" value="The quick brown fox あいうえお 0123456789" />
+          </div>
+          <div>
+            <label class="small">サイズ <span id="sizeLabel">32px</span></label>
+            <input id="size" type="range" min="10" max="120" value="32" />
+          </div>
+          <div>
+            <label class="small">表示モード</label>
+            <select id="filter">
+              <option value="all">すべて</option>
+              <option value="undecided">未決</option>
+              <option value="keep">要るだけ</option>
+              <option value="drop">要らないだけ</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button id="load" class="btn primary">🔎 ローカルフォントを読み込む</button>
+          <button id="export" class="btn">💾 要る一覧をダウンロード</button>
+          <button id="import" class="btn ghost">📥 インポート</button>
+          <input id="file" type="file" accept=".txt" class="sr" />
+        </div>
+
+        <div class="chips">
+          <label class="chip" title="ファミリ単位で仕分け">
+            <input id="group" type="checkbox" checked />
+            <span>ファミリ単位</span>
+          </label>
+          <label class="chip" title="プレビューの軽量化（読み込み時に徐々に表示）">
+            <input id="lazy" type="checkbox" checked />
+            <span>遅延描画</span>
+          </label>
+          <label class="chip" title="エクスポート形式（txtの中身）">
+            <span>書き出し: </span>
+            <select id="exportMode">
+              <option value="family" selected>ファミリ名</option>
+              <option value="full">フルネーム</option>
+              <option value="ps">PostScript名</option>
+            </select>
+          </label>
+          <button id="reset" class="btn ghost">🔄 仕分けリセット</button>
+        </div>
+      </div>
+
+      <details style="margin-top:12px;">
+        <summary>動作メモ</summary>
+        <div class="hint">
+          ・対応ブラウザで <b>local-fonts 権限</b> を許可すると一覧を取得できるの。<br/>
+          ・Firefox / Safari では列挙できないから、代わりに案内を出すのなの。<br/>
+          ・仕分け結果はローカルストレージに自動保存するよ。
+        </div>
+      </details>
+
+      <div id="status" class="hint" style="margin-top:10px;"></div>
+      <div id="list" class="list" aria-live="polite"></div>
+      <div id="end" class="empty"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Made with ♥ — このページは完全オフラインで動くの。権限はブラウザ側で管理されるよ。</small>
+  </footer>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---- State ---------------------------------------------------------------
+  const state = {
+    fonts: /** @type {Array<FontLike>} */([]),
+    filtered: /** @type {Array<FontLike>} */([]),
+    page: 0,
+    pageSize: 80,
+    decisions: loadDecisions(), // { key: 'keep'|'drop' }
+    groupByFamily: true,
+    lazy: true,
+    exportMode: 'family',
+    sampleText: 'The quick brown fox あいうえお 0123456789',
+    sizePx: 32,
+    filter: 'all',
+    query: '',
+    supported: {
+      queryLocalFonts: 'queryLocalFonts' in window,
+      navFontsQuery: !!(navigator.fonts && 'query' in navigator.fonts)
+    }
+  };
+
+  // Key helpers
+  function keyFor(face, grouped) {
+    return grouped ? `fam:${face.family}` : `ps:${face.postscriptName || face.fullName || face.family}`;
+  }
+  function saveDecisions() {
+    localStorage.setItem('font-organizer:v1', JSON.stringify(state.decisions));
+  }
+  function loadDecisions() {
+    try { return JSON.parse(localStorage.getItem('font-organizer:v1') || '{}'); }
+    catch { return {}; }
+  }
+
+  // ---- DOM elements --------------------------------------------------------
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#list');
+  const statusEl = $('#status');
+  const endEl = $('#end');
+  const qEl = /** @type {HTMLInputElement} */($('#q'));
+  const sampleEl = /** @type {HTMLInputElement} */($('#sample'));
+  const sizeEl = /** @type {HTMLInputElement} */($('#size'));
+  const sizeLabel = $('#sizeLabel');
+  const filterEl = /** @type {HTMLSelectElement} */($('#filter'));
+  const loadBtn = /** @type {HTMLButtonElement} */($('#load'));
+  const exportBtn = /** @type {HTMLButtonElement} */($('#export'));
+  const importBtn = /** @type {HTMLButtonElement} */($('#import'));
+  const fileInput = /** @type {HTMLInputElement} */($('#file'));
+  const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
+  const groupChk = /** @type {HTMLInputElement} */($('#group'));
+  const lazyChk = /** @type {HTMLInputElement} */($('#lazy'));
+  const exportModeSel = /** @type {HTMLSelectElement} */($('#exportMode'));
+
+  // ---- Types (JSDoc) -------------------------------------------------------
+  /**
+   * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string}} FontLike
+   */
+
+  // ---- UI wiring -----------------------------------------------------------
+  qEl.addEventListener('input', () => { state.query = qEl.value.trim().toLowerCase(); applyFilterAndRender(true); });
+  sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); });
+  sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); });
+  filterEl.addEventListener('change', () => { state.filter = filterEl.value; applyFilterAndRender(true); });
+  groupChk.addEventListener('change', () => { state.groupByFamily = groupChk.checked; applyFilterAndRender(true); });
+  lazyChk.addEventListener('change', () => { state.lazy = lazyChk.checked; applyFilterAndRender(true); });
+  exportModeSel.addEventListener('change', () => { state.exportMode = exportModeSel.value; });
+
+  resetBtn.addEventListener('click', () => {
+    if (!confirm('仕分け結果をすべてリセットするの？')) return;
+    state.decisions = {};
+    saveDecisions();
+    applyFilterAndRender(false);
+  });
+
+  importBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const names = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
+    // どのキーで照合するかは exportMode に合わせず「賢く」統合
+    let matched = 0;
+    for (const f of state.fonts) {
+      const kFam = `fam:${f.family}`;
+      const kPS  = `ps:${f.postscriptName || f.fullName || f.family}`;
+      if (names.has(f.family) || names.has(f.postscriptName) || names.has(f.fullName)) {
+        state.decisions[state.groupByFamily ? kFam : kPS] = 'keep';
+        matched++;
+      }
+    }
+    saveDecisions();
+    alert(`読み込み完了: ${matched} 件を「要る」に設定したの`);
+    applyFilterAndRender(false);
+    fileInput.value = '';
+  });
+
+  exportBtn.addEventListener('click', () => {
+    const keepSet = new Set();
+    if (state.exportMode === 'family') {
+      // family 単位
+      for (const f of state.fonts) {
+        const kFam = `fam:${f.family}`;
+        const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
+        const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
+        if (kept) keepSet.add(f.family);
+      }
+    } else if (state.exportMode === 'full') {
+      for (const f of state.fonts) {
+        const kFam = `fam:${f.family}`;
+        const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
+        const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
+        if (kept && f.fullName) keepSet.add(f.fullName);
+      }
+    } else {
+      for (const f of state.fonts) {
+        const kFam = `fam:${f.family}`;
+        const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
+        const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
+        if (kept) keepSet.add(f.postscriptName || f.fullName || f.family);
+      }
+    }
+    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'ja'));
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().replace(/[:.]/g,'-');
+    a.download = `kept-fonts_${state.exportMode}_${ts}.txt`;
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  loadBtn.addEventListener('click', async () => {
+    await loadFonts();
+  });
+
+  // ---- Data loading --------------------------------------------------------
+  async function loadFonts() {
+    listEl.innerHTML = '';
+    endEl.textContent = '';
+    status('ローカルフォントの列挙を開始するの…');
+
+    // Try permission hint (optional)
+    try {
+      if (navigator.permissions) {
+        // Not all UAs implement this name, so ignore errors
+        // @ts-ignore
+        const p = await navigator.permissions.query({name:'local-fonts'});
+        if (p && p.state === 'denied') {
+          status('権限が拒否されてるの。アドレスバー左のアイコンから許可してね。', true);
+        }
+      }
+    } catch {}
+
+    /** @type {Array<FontLike>} */
+    let fonts = [];
+    try {
+      if ('queryLocalFonts' in window) {
+        // @ts-ignore
+        fonts = await window.queryLocalFonts();
+      } else if (navigator.fonts && 'query' in navigator.fonts) {
+        // @ts-ignore older API returns async iterator
+        for await (const md of navigator.fonts.query()) {
+          fonts.push(md);
+        }
+      } else {
+        unsupportedMessage();
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+      status('権限が許可されなかったか、ポリシーでブロックされてるの。Chrome設定を確認してね。', true);
+      return;
+    }
+
+    // Normalize & sort
+    state.fonts = fonts
+      .map(f => ({ family: f.family, fullName: f.fullName || '', postscriptName: f.postscriptName || '', style: f.style || '' }))
+      .sort((a,b)=> a.family.localeCompare(b.family,'ja') || (a.fullName||'').localeCompare(b.fullName||'','ja'));
+
+    status(`読み込み完了: ${state.fonts.length} フォントフェイスを取得したの`);
+    applyFilterAndRender(true);
+  }
+
+  function unsupportedMessage() {
+    statusEl.innerHTML = '';
+    listEl.innerHTML = `
+      <div class="empty">
+        <div class="danger">このブラウザではインストールフォントの列挙ができないの…</div>
+        <div class="hint" style="margin-top:8px">
+          Chrome または Microsoft Edge の最新バージョンで開いて、<br/>
+          「ローカルフォントへのアクセス」を許可してね。
+        </div>
+      </div>`;
+  }
+
+  // ---- Filtering & grouping ------------------------------------------------
+  function applyFilterAndRender(resetPage) {
+    if (resetPage) state.page = 0;
+
+    let arr = state.fonts;
+
+    // Group by family (choose representative face)
+    if (state.groupByFamily) {
+      const map = new Map();
+      for (const f of arr) {
+        if (!map.has(f.family)) map.set(f.family, f);
+        // Prefer "Regular" if available
+        const chosen = map.get(f.family);
+        if (f.style && /regular/i.test(f.style)) map.set(f.family, f);
+        else if (!chosen) map.set(f.family, f);
+      }
+      arr = Array.from(map.values());
+    }
+
+    // Text query
+    if (state.query) {
+      const q = state.query;
+      arr = arr.filter(f =>
+        (f.family && f.family.toLowerCase().includes(q)) ||
+        (f.fullName && f.fullName.toLowerCase().includes(q)) ||
+        (f.postscriptName && f.postscriptName.toLowerCase().includes(q))
+      );
+    }
+
+    // Status filter
+    const filtered = arr.filter(f => {
+      const k = keyFor(f, state.groupByFamily);
+      const d = state.decisions[k];
+      if (state.filter === 'keep') return d === 'keep';
+      if (state.filter === 'drop') return d === 'drop';
+      if (state.filter === 'undecided') return d !== 'keep' && d !== 'drop';
+      return true;
+    });
+
+    state.filtered = filtered;
+    renderPage(true);
+  }
+
+  // ---- Rendering -----------------------------------------------------------
+  let io = null;
+  function renderPage(reset) {
+    if (reset) listEl.innerHTML = '';
+    if (!state.filtered.length) {
+      endEl.textContent = '該当なしなの…';
+      return;
+    } else {
+      endEl.textContent = '';
+    }
+
+    const start = state.page * state.pageSize;
+    const end = Math.min(start + state.pageSize, state.filtered.length);
+    const frag = document.createDocumentFragment();
+
+    for (let i = start; i < end; i++) {
+      frag.appendChild(renderCard(state.filtered[i]));
+    }
+    listEl.appendChild(frag);
+
+    if (state.lazy) {
+      if (io) io.disconnect();
+      io = new IntersectionObserver(entries => {
+        if (entries.some(e => e.isIntersecting)) {
+          io.disconnect();
+          if ((state.page + 1) * state.pageSize < state.filtered.length) {
+            state.page++;
+            renderPage(false);
+          } else {
+            endEl.textContent = 'おしまいなの';
+          }
+        }
+      }, {rootMargin: '800px 0px'});
+      const sentinel = document.createElement('div');
+      sentinel.style.height = '1px';
+      listEl.appendChild(sentinel);
+      io.observe(sentinel);
+    } else {
+      // render all
+      while ((state.page + 1) * state.pageSize < state.filtered.length) {
+        state.page++;
+        renderPage(false);
+      }
+      endEl.textContent = 'おしまいなの';
+    }
+
+    refreshSamples();
+  }
+
+  function renderCard(face) {
+    const k = keyFor(face, state.groupByFamily);
+    const d = state.decisions[k]; // 'keep' | 'drop' | undefined
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const title = document.createElement('div');
+    title.className = 'row';
+    title.innerHTML = `
+      <div>
+        <strong>${escapeHtml(face.family)}</strong>
+        ${face.fullName ? ` <span class="tag">${escapeHtml(face.fullName)}</span>` : ''}
+        ${face.postscriptName ? ` <span class="tag">PS: ${escapeHtml(face.postscriptName)}</span>` : ''}
+        ${face.style ? ` <span class="tag">${escapeHtml(face.style)}</span>` : ''}
+      </div>
+      <div class="status">
+        <button class="pill keep" aria-pressed="${d==='keep'}">要る</button>
+        <button class="pill drop" aria-pressed="${d==='drop'}">要らない</button>
+      </div>
+    `;
+    const preview = document.createElement('div');
+    preview.className = 'preview';
+    preview.dataset.family = face.family;
+    preview.dataset.full = face.fullName || '';
+    preview.dataset.ps = face.postscriptName || '';
+    preview.textContent = state.sampleText;
+
+    // Button handlers
+    const [keepBtn, dropBtn] = title.querySelectorAll('button');
+    keepBtn.addEventListener('click', () => {
+      state.decisions[k] = 'keep';
+      saveDecisions();
+      keepBtn.setAttribute('aria-pressed', 'true');
+      dropBtn.setAttribute('aria-pressed', 'false');
+    });
+    dropBtn.addEventListener('click', () => {
+      state.decisions[k] = 'drop';
+      saveDecisions();
+      keepBtn.setAttribute('aria-pressed', 'false');
+      dropBtn.setAttribute('aria-pressed', 'true');
+    });
+
+    if (d === 'keep') keepBtn.setAttribute('aria-pressed', 'true');
+    if (d === 'drop') dropBtn.setAttribute('aria-pressed', 'true');
+
+    card.appendChild(title);
+    card.appendChild(preview);
+    return card;
+  }
+
+  function refreshSamples() {
+    const previews = listEl.querySelectorAll('.preview');
+    previews.forEach(el => {
+      const fam = el.dataset.family || '';
+      const full = el.dataset.full || '';
+      const ps = el.dataset.ps || '';
+      // Try to strongly prefer the specific face via @font-face local()
+      const alias = `__LFA_${(ps || full || fam).replace(/[^a-z0-9_-]/gi,'_')}`;
+      ensureLocalFace(alias, ps, full, fam);
+      el.style.fontFamily = `"${alias}", "${full}", "${fam}", system-ui, sans-serif`;
+      el.style.fontSize = state.sizePx + 'px';
+      el.textContent = state.sampleText;
+    });
+  }
+
+  const injected = new Set();
+  function ensureLocalFace(alias, ps, full, fam) {
+    if (injected.has(alias)) return;
+    const css = `
+      @font-face {
+        font-family: "${alias}";
+        src: local("${escapeCss(ps)}"), local("${escapeCss(full)}"), local("${escapeCss(fam)}");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+    `;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+    injected.add(alias);
+  }
+
+  function status(msg, isErr=false) {
+    statusEl.innerHTML = isErr ? `<span class="danger">⚠ ${escapeHtml(msg)}</span>` : `<span class="ok">✔ ${escapeHtml(msg)}</span>`;
+  }
+
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function escapeCss(s){ return (s||'').replace(/["\\]/g, m=>`\\${m}`); }
+
+  // 初回、ブラウザ対応を案内
+  (function initBanner(){
+    if (!state.supported.queryLocalFonts && !state.supported.navFontsQuery) {
+      unsupportedMessage();
+    } else {
+      status('準備OK。左上の「ローカルフォントを読み込む」を押してね。');
+    }
+  })();
+})();
+</script>
+</body>
+</html>
