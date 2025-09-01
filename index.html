@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Local Font Organizer — 1ファイル版</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 <style>
   :root {
     --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --accent:#65c3ff;
@@ -23,7 +24,7 @@
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
   input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none;box-sizing:border-box}
   input[type="range"]{width:100%}
-  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#1f2433;color:var(--ink);cursor:pointer}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#1f2433;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
   .btn.primary{background:var(--accent);color:#072233;font-weight:700}
   .btn.ghost{background:transparent;outline:1px solid #2a3040}
   .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -48,14 +49,15 @@
   .empty{padding:24px;text-align:center;color:var(--muted)}
   footer{padding:24px 16px;color:var(--muted);text-align:center}
   .accent{color:var(--accent)}
-  .danger{color:#ff8b8b}
-  .ok{color:#6ff7a8}
+  .danger{color:#ff8b8b;display:inline-flex;align-items:center;gap:4px}
+  .ok{color:#6ff7a8;display:inline-flex;align-items:center;gap:4px}
   details summary{cursor:pointer;opacity:.9}
   .flash-keep{animation:flashKeep .6s;}
   .flash-drop{animation:flashDrop .6s;}
   @keyframes flashKeep{from{background:rgba(46,204,113,.2);}to{background:#0e1120;}}
   @keyframes flashDrop{from{background:rgba(255,107,107,.2);}to{background:#0e1120;}}
   .sr{position:absolute;left:-9999px}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
 </style>
 </head>
 <body>
@@ -70,9 +72,9 @@
     <section class="panel">
       <div class="bar">
         <div class="toolbar">
-          <button id="load" class="btn primary">🔎 ローカルフォントを読み込む</button>
-          <button id="import" class="btn ghost">📥 インポート</button>
-          <button id="export" class="btn">💾 必要なフォント一覧をダウンロード</button>
+          <button id="load" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
+          <button id="import" class="btn ghost"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
+          <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
           <label class="chip" title="エクスポート形式（txtの中身）">
             <span>書き出し: </span>
             <select id="exportMode">
@@ -109,7 +111,7 @@
         </div>
 
         <div class="chips">
-          <button id="reset" class="btn ghost">🔄 仕分けリセット</button>
+          <button id="reset" class="btn ghost"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
           <label class="chip" title="ファミリ単位で仕分け">
             <input id="group" type="checkbox" checked />
             <span>ファミリ単位</span>
@@ -526,7 +528,9 @@
   }
 
   function status(msg, isErr=false) {
-    statusEl.innerHTML = isErr ? `<span class="danger">⚠ ${escapeHtml(msg)}</span>` : `<span class="ok">✔ ${escapeHtml(msg)}</span>`;
+    statusEl.innerHTML = isErr
+      ? `<span class="danger"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span>${escapeHtml(msg)}</span></span>`
+      : `<span class="ok"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>${escapeHtml(msg)}</span></span>`;
   }
 
   function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
