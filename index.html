@@ -12,7 +12,9 @@
   }
   html,body{height:100%;}
   body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;}
-  header{background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter: blur(6px);}
+  header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter:blur(6px);}
+  header .wrap{display:flex;align-items:flex-start;gap:16px;}
+  .title-block{flex:1;}
   .wrap{max-width:1200px;margin:0 auto;padding:16px;}
   .bar{display:grid;gap:10px;grid-template-columns: 1fr; }
   @media(min-width:900px){ .bar{grid-template-columns: 1fr; }}
@@ -56,17 +58,19 @@
   @keyframes flashDrop{from{background:rgba(255,107,107,.2);}to{background:#0e1120;}}
   .sr{position:absolute;left:-9999px}
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
-  .x-link{position:fixed;top:16px;right:16px;z-index:1000;text-decoration:none;background:rgba(0,0,0,.4);padding:6px 10px;border-radius:8px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:6px;color:var(--accent);}
+  .x-link{margin-left:auto;text-decoration:none;background:rgba(0,0,0,.4);padding:6px 10px;border-radius:8px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:6px;color:var(--accent);}
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
 </style>
 </head>
 <body>
-  <a class="x-link" href="https://x.com/MugLab3" target="_blank" rel="noopener noreferrer"><img src="https://unavatar.io/github/mug-lab-3" alt="MugLab3 icon" />MugLab3 on X</a>
   <header>
     <div class="wrap">
-      <h1>Local Font Organizer</h1>
-      <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで利用できるフォント整理アプリです。最初に権限を許可してください。</div>
+      <div class="title-block">
+        <h1>Local Font Organizer</h1>
+        <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで利用できるフォント整理アプリです。最初に権限を許可してください。</div>
+      </div>
+      <a class="x-link" href="https://x.com/MugLab3" target="_blank" rel="noopener noreferrer"><img src="https://unavatar.io/github/mug-lab-3" alt="MugLab3 icon" />MugLab3 on X</a>
     </div>
   </header>
 
