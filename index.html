@@ -68,8 +68,9 @@
   .x-link img{width:24px;height:24px;border-radius:50%;}
   .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000;font-size:18px;}
   .loading[hidden]{display:none;}
-  .pulse{animation:pulseLoad 1.5s infinite;}
-  @keyframes pulseLoad{0%{box-shadow:0 0 0 0 rgba(172,0,172,.6);}70%{box-shadow:0 0 0 10px rgba(172,0,172,0);}100%{box-shadow:0 0 0 0 rgba(172,0,172,0);}}
+  .spin{position:relative;}
+  .spin::before{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,var(--primary),transparent 60%,var(--primary));animation:spinBorder 1.5s linear infinite;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+  @keyframes spinBorder{to{transform:rotate(360deg);}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
@@ -195,7 +196,7 @@
   const loadingEl = $('#loading');
   const loadingTextEl = $('#loadingText');
 
-  if (!state.fonts.length) loadBtn.classList.add('pulse');
+  if (!state.fonts.length) loadBtn.classList.add('spin');
 
   function setUIEnabled(enabled) {
     document.querySelectorAll('button, input, select').forEach(el => {
@@ -289,7 +290,7 @@
 
   // ---- Data loading --------------------------------------------------------
   async function loadFonts() {
-    loadBtn.classList.remove('pulse');
+    loadBtn.classList.remove('spin');
     listEl.innerHTML = '';
     endEl.textContent = '';
     setUIEnabled(false);
@@ -361,7 +362,7 @@
     } finally {
       hideLoading();
       setUIEnabled(true);
-      if (!state.fonts.length) loadBtn.classList.add('pulse');
+      if (!state.fonts.length) loadBtn.classList.add('spin');
     }
   }
 
