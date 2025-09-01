@@ -231,7 +231,8 @@
     }
       saveDecisions();
       alert(`読み込み完了: ${matchedFamilies.size}件を「必要」に設定しました`);
-    applyFilterAndRender(false);
+    // Imported decisions may alter earlier pages; reset to start
+    applyFilterAndRender(true);
     fileInput.value = '';
   });
 
