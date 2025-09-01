@@ -341,23 +341,53 @@
 
   // ---- Rendering -----------------------------------------------------------
   let io = null;
+  let previewObserver = null;
+  const visiblePreviews = new Set();
+
   function renderPage(reset) {
-    if (reset) listEl.innerHTML = '';
+    if (reset) {
+      listEl.innerHTML = '';
+      visiblePreviews.clear();
+      if (previewObserver) previewObserver.disconnect();
+    }
     if (!state.filtered.length) {
         endEl.textContent = '該当する項目はありません。';
       return;
     } else {
       endEl.textContent = '';
     }
+    if (!state.lazy && previewObserver) {
+      previewObserver.disconnect();
+      previewObserver = null;
+      visiblePreviews.clear();
+    }
 
     const start = state.page * state.pageSize;
     const end = Math.min(start + state.pageSize, state.filtered.length);
     const frag = document.createDocumentFragment();
+    const cards = [];
 
     for (let i = start; i < end; i++) {
-      frag.appendChild(renderCard(state.filtered[i]));
+      const card = renderCard(state.filtered[i]);
+      frag.appendChild(card);
+      cards.push(card);
     }
     listEl.appendChild(frag);
+
+    if (state.lazy) {
+      if (!previewObserver) {
+        previewObserver = new IntersectionObserver(handlePreviewIntersect, {rootMargin: '200px 0px'});
+      }
+      for (const c of cards) {
+        const p = c.querySelector('.preview');
+        if (p) previewObserver.observe(p);
+      }
+    } else {
+      for (const c of cards) {
+        const p = c.querySelector('.preview');
+        if (p) renderPreview(p);
+      }
+    }
 
     if (state.lazy) {
       if (io) io.disconnect();
@@ -388,6 +418,18 @@
     refreshSamples();
   }
 
+  function handlePreviewIntersect(entries) {
+    for (const e of entries) {
+      const el = /** @type {HTMLDivElement} */ (e.target);
+      if (e.isIntersecting) {
+        visiblePreviews.add(el);
+        renderPreview(el);
+      } else {
+        visiblePreviews.delete(el);
+      }
+    }
+  }
+
   function renderCard(face) {
     const k = keyFor(face);
     const d = state.decisions[k]; // 'keep' | 'drop' | undefined
@@ -410,7 +452,7 @@
     preview.dataset.family = face.family;
     preview.dataset.full = face.fullName || '';
     preview.dataset.ps = face.postscriptName || '';
-    preview.textContent = state.sampleText;
+    preview.textContent = '';
 
     // Button handlers
     const [keepBtn, dropBtn] = title.querySelectorAll('button');
@@ -453,18 +495,24 @@
   }
 
   function refreshSamples() {
-    const previews = listEl.querySelectorAll('.preview');
-    previews.forEach(el => {
-      const fam = el.dataset.family || '';
-      const full = el.dataset.full || '';
-      const ps = el.dataset.ps || '';
-      // Try to strongly prefer the specific face via @font-face local()
-      const alias = `__LFA_${(ps || full || fam).replace(/[^a-z0-9_-]/gi,'_')}`;
-      ensureLocalFace(alias, ps, full, fam);
-      el.style.fontFamily = `"${alias}", "${full}", "${fam}"`;
-      el.style.fontSize = state.sizePx + 'px';
-      el.textContent = state.sampleText;
-    });
+    if (state.lazy) {
+      visiblePreviews.forEach(el => renderPreview(el));
+    } else {
+      const previews = listEl.querySelectorAll('.preview');
+      previews.forEach(el => renderPreview(el));
+    }
+  }
+
+  function renderPreview(el) {
+    const fam = el.dataset.family || '';
+    const full = el.dataset.full || '';
+    const ps = el.dataset.ps || '';
+    // Try to strongly prefer the specific face via @font-face local()
+    const alias = `__LFA_${(ps || full || fam).replace(/[^a-z0-9_-]/gi,'_')}`;
+    ensureLocalFace(alias, ps, full, fam);
+    el.style.fontFamily = `"${alias}", "${full}", "${fam}"`;
+    el.style.fontSize = state.sizePx + 'px';
+    el.textContent = state.sampleText;
   }
 
   const injected = new Set();
