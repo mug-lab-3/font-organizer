@@ -26,10 +26,10 @@
   input[type="range"]{width:100%}
   .btn{appearance:none;border:1px solid #2a3040;border-radius:12px;padding:10px 14px;background:var(--chip);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
   .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn input{margin:0;}
+  .btn select{margin:0;border:0;background:transparent;color:inherit;padding:0;width:auto;}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{background:var(--chip);padding:6px 10px;border-radius:999px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
-  .chip input{margin:0}
   .list{margin-top:14px;display:grid;grid-template-columns:1fr;gap:10px}
   @media(min-width:700px){ .list{grid-template-columns:1fr 1fr} }
   .card{background:#0e1120;border:1px solid #1f2740;border-radius:16px;padding:14px;display:grid;gap:10px}
@@ -73,7 +73,7 @@
             <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
             <button id="import" class="btn"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
             <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
-          <label class="chip" title="エクスポート形式（txtの中身）">
+          <label class="btn" title="エクスポート形式（txtの中身）">
             <span>書き出し: </span>
             <select id="exportMode">
               <option value="family" selected>ファミリ名</option>
@@ -110,11 +110,11 @@
 
         <div class="chips">
           <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
-          <label class="chip" title="ファミリ単位で仕分け">
+          <label class="btn" title="ファミリ単位で仕分け">
             <input id="group" type="checkbox" checked />
             <span>ファミリ単位</span>
           </label>
-          <label class="chip" title="プレビューの軽量化（読み込み時に徐々に表示）">
+          <label class="btn" title="プレビューの軽量化（読み込み時に徐々に表示）">
             <input id="lazy" type="checkbox" checked />
             <span>遅延描画</span>
           </label>
