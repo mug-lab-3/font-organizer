@@ -221,16 +221,16 @@
     if (!file) return;
     const text = await file.text();
     const names = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
-    let matched = 0;
+    const matchedFamilies = new Set();
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
       if (names.has(f.family) || names.has(f.postscriptName) || names.has(f.fullName)) {
         state.decisions[kFam] = 'keep';
-        matched++;
+        matchedFamilies.add(f.family);
       }
     }
       saveDecisions();
-      alert(`読み込み完了: ${matched} 件を「必要」に設定しました`);
+      alert(`読み込み完了: ${matchedFamilies.size}件を「必要」に設定しました`);
     applyFilterAndRender(false);
     fileInput.value = '';
   });
