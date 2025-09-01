@@ -37,7 +37,8 @@
   .list{margin-top:14px;display:grid;grid-template-columns:1fr;gap:10px}
   @media(min-width:700px){ .list{grid-template-columns:1fr 1fr} }
   .card{background:#0e1120;border:1px solid #1f2740;border-radius:16px;padding:14px;display:grid;gap:10px}
-  .meta{display:flex;gap:8px;flex-wrap:wrap}
+  .meta{display:flex;flex-direction:column;gap:4px}
+  .meta .sub{font-size:12px;color:var(--muted)}
   .tag{font-size:12px;background:#12172a;border:1px solid #1e2540;padding:2px 8px;border-radius:999px;color:var(--muted)}
   .preview{min-height:48px;border-radius:10px;padding:12px;background:#0b0f1e;border:1px dashed #26304d;overflow-wrap:anywhere;word-break:break-word;box-sizing:border-box}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
@@ -327,17 +328,20 @@
       const enriched = [];
       for (let i = 0; i < fonts.length; i++) {
         const f = fonts[i];
-        let otName = '', otFamily = '';
+        let otName = '', otFamily = '', jpFamily = '';
         try {
           const blob = await f.blob();
           const font = opentype.parse(await blob.arrayBuffer());
           const enFull = englishName(font?.names?.fullName);
           const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
+          const jaFam = japaneseName(font?.names?.preferredFamily) || japaneseName(font?.names?.fontFamily);
           otName = enFull;
           otFamily = enFam;
+          jpFamily = jaFam;
         } catch {}
         enriched.push({
           family: otFamily || f.family,
+          jpFamily: jpFamily || f.family,
           fullName: otName || f.fullName || '',
           postscriptName: f.postscriptName || '',
           style: f.style || '',
@@ -392,6 +396,7 @@
       const q = state.query;
       arr = arr.filter(f =>
         (f.family && f.family.toLowerCase().includes(q)) ||
+        (f.jpFamily && f.jpFamily.toLowerCase().includes(q)) ||
         (f.fullName && f.fullName.toLowerCase().includes(q)) ||
         (f.postscriptName && f.postscriptName.toLowerCase().includes(q))
       );
@@ -491,6 +496,7 @@
     title.innerHTML = `
       <div class="meta">
         <strong>${escapeHtml(face.family)}</strong>
+        ${face.jpFamily && face.jpFamily !== face.family ? `<div class="sub">${escapeHtml(face.jpFamily)}</div>` : ''}
       </div>
       <div class="status">
         <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
@@ -592,6 +598,11 @@
   function englishName(rec){
     if (!rec) return '';
     return rec.en || rec.enUS || rec['en-US'] || rec['en-us'] || Object.values(rec)[0] || '';
+  }
+
+  function japaneseName(rec){
+    if (!rec) return '';
+    return rec.ja || rec['ja-JP'] || rec['ja-jp'] || '';
   }
 
   function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
