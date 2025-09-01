@@ -504,8 +504,14 @@
       ensureLocalFace(alias, ps, full, fam);
       el.style.fontFamily = `"${alias}", "${full}", "${fam}", system-ui, sans-serif`;
       el.style.fontSize = state.sizePx + 'px';
-      const chars = Array.from(state.sampleText);
-      el.innerHTML = chars.map(ch => document.fonts.check('1em ' + alias, ch) ? escapeHtml(ch) : '<span class="missing">□</span>').join('');
+      const fontSpec = `1em "${alias}"`;
+      document.fonts.load(fontSpec).then(() => {
+        const chars = Array.from(state.sampleText);
+        el.innerHTML = chars.map(ch => document.fonts.check(fontSpec, ch)
+          ? escapeHtml(ch)
+          : '<span class="missing">□</span>'
+        ).join('');
+      });
     });
   }
 
