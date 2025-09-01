@@ -50,6 +50,7 @@
   .accent{color:var(--accent)}
   .danger{color:#ff8b8b}
   .ok{color:#6ff7a8}
+    .missing{display:inline-block;border:1px solid var(--drop);color:var(--drop);border-radius:2px;padding:0 2px}
   details summary{cursor:pointer;opacity:.9}
   .flash-keep{animation:flashKeep .6s;}
   .flash-drop{animation:flashDrop .6s;}
@@ -503,7 +504,8 @@
       ensureLocalFace(alias, ps, full, fam);
       el.style.fontFamily = `"${alias}", "${full}", "${fam}", system-ui, sans-serif`;
       el.style.fontSize = state.sizePx + 'px';
-      el.textContent = state.sampleText;
+      const chars = Array.from(state.sampleText);
+      el.innerHTML = chars.map(ch => document.fonts.check('1em ' + alias, ch) ? escapeHtml(ch) : '<span class="missing">□</span>').join('');
     });
   }
 
