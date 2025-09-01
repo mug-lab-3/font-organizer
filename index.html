@@ -224,17 +224,17 @@
     const file = fileInput.files && fileInput.files[0];
     if (!file) return;
     const text = await file.text();
-    const names = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
+    const families = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
     const matchedFamilies = new Set();
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
-      if (names.has(f.family) || names.has(f.postscriptName) || names.has(f.fullName)) {
+      if (families.has(f.family)) {
         state.decisions[kFam] = 'keep';
         matchedFamilies.add(f.family);
       }
     }
-      saveDecisions();
-      alert(`読み込み完了: ${matchedFamilies.size}件を「必要」に設定しました`);
+    saveDecisions();
+    alert(`読み込み完了: ${matchedFamilies.size}件を「必要」に設定しました`);
     // Imported decisions may alter earlier pages; reset to start
     applyFilterAndRender(true);
     fileInput.value = '';
@@ -244,9 +244,7 @@
     const keepSet = new Set();
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
-      const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
-      const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
-      if (kept) keepSet.add(f.family);
+      if (state.decisions[kFam] === 'keep') keepSet.add(f.family);
     }
     const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'en'));
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
