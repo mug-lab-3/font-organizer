@@ -248,7 +248,7 @@
       const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
       if (kept) keepSet.add(f.family);
     }
-    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'ja'));
+    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'en'));
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a');
     a.download = 'davinci_resolve_fonts.txt';
@@ -307,13 +307,14 @@
       try {
         const blob = await f.blob();
         const font = opentype.parse(await blob.arrayBuffer());
-        otName = font?.names?.fullName?.ja || font?.names?.fullName?.en || '';
-        otFamily = font?.names?.preferredFamily?.ja || font?.names?.preferredFamily?.en ||
-                   font?.names?.fontFamily?.ja || font?.names?.fontFamily?.en || '';
+        const enFull = englishName(font?.names?.fullName);
+        const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
+        otName = enFull;
+        otFamily = enFam;
       } catch {}
       enriched.push({
-        family: f.family,
-        fullName: f.fullName || '',
+        family: otFamily || f.family,
+        fullName: otName || f.fullName || '',
         postscriptName: f.postscriptName || '',
         style: f.style || '',
         otName,
@@ -321,7 +322,7 @@
       });
     }
     state.fonts = enriched
-      .sort((a,b)=> a.family.localeCompare(b.family,'ja') || (a.fullName||'').localeCompare(b.fullName||'','ja'));
+      .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
     const familyCount = new Set(state.fonts.map(f => f.family)).size;
     status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
     applyFilterAndRender(true);
@@ -558,6 +559,11 @@
     statusEl.innerHTML = isErr
       ? `<span class="danger"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span>${escapeHtml(msg)}</span></span>`
       : `<span class="ok"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>${escapeHtml(msg)}</span></span>`;
+  }
+
+  function englishName(rec){
+    if (!rec) return '';
+    return rec.en || rec.enUS || rec['en-US'] || rec['en-us'] || Object.values(rec)[0] || '';
   }
 
   function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
