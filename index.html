@@ -440,8 +440,9 @@
     const title = document.createElement('div');
     title.className = 'row';
     title.innerHTML = `
-      <div>
+      <div class="meta">
         <strong>${escapeHtml(face.family)}</strong>
+        ${face.postscriptName ? `<span class="tag">${escapeHtml(face.postscriptName)}</span>` : ''}
       </div>
       <div class="status">
           <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
