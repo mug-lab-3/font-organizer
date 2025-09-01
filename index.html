@@ -501,7 +501,7 @@
       // Try to strongly prefer the specific face via @font-face local()
       const alias = `__LFA_${(ps || full || fam).replace(/[^a-z0-9_-]/gi,'_')}`;
       ensureLocalFace(alias, ps, full, fam);
-      el.style.fontFamily = `"${alias}", "${full}", "${fam}", system-ui, sans-serif`;
+      el.style.fontFamily = `"${alias}", "${full}", "${fam}"`;
       el.style.fontSize = state.sizePx + 'px';
       el.textContent = state.sampleText;
     });
