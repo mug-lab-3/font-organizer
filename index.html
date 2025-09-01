@@ -22,11 +22,9 @@
   .controls{display:grid;gap:12px;grid-template-columns: 1fr;}
   @media(min-width:900px){ .controls{grid-template-columns: 200px 1fr;align-items:end;} }
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
-  input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none;box-sizing:border-box}
+  input[type="text"], select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none;box-sizing:border-box}
   input[type="range"]{width:100%}
-  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#1f2433;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-  .btn.primary{background:var(--accent);color:#072233;font-weight:700}
-  .btn.ghost{background:transparent;outline:1px solid #2a3040}
+  .btn{appearance:none;border:1px solid #2a3040;border-radius:12px;padding:10px 14px;background:var(--chip);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
@@ -41,11 +39,11 @@
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
   .status{display:flex;gap:8px}
   .status button{transition:background .15s,color .15s}
-  .status .keep{color:var(--keep);background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4)}
-  .status .drop{color:var(--drop);background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.5)}
+  .status .keep{border:1px solid var(--keep)}
+  .status .drop{border:1px solid var(--drop)}
   .status .keep[aria-pressed="true"]{background:var(--keep);color:#0b0c10}
   .status .drop[aria-pressed="true"]{background:var(--drop);color:#0b0c10}
-  .pill{padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;user-select:none}
+  .pill{padding:8px 14px;border-radius:12px;font-size:13px;cursor:pointer;user-select:none;background:var(--chip);color:var(--ink);border:1px solid #2a3040}
   .empty{padding:24px;text-align:center;color:var(--muted)}
   footer{padding:24px 16px;color:var(--muted);text-align:center}
   .accent{color:var(--accent)}
@@ -72,9 +70,9 @@
     <section class="panel">
       <div class="bar">
         <div class="toolbar">
-          <button id="load" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
-          <button id="import" class="btn ghost"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
-          <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
+            <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
+            <button id="import" class="btn"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
+            <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
           <label class="chip" title="エクスポート形式（txtの中身）">
             <span>書き出し: </span>
             <select id="exportMode">
@@ -111,7 +109,7 @@
         </div>
 
         <div class="chips">
-          <button id="reset" class="btn ghost"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
+          <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
           <label class="chip" title="ファミリ単位で仕分け">
             <input id="group" type="checkbox" checked />
             <span>ファミリ単位</span>
