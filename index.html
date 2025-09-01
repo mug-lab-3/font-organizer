@@ -442,7 +442,9 @@
     title.innerHTML = `
       <div class="meta">
         <strong>${escapeHtml(face.family)}</strong>
-        ${face.postscriptName ? `<span class="tag">${escapeHtml(face.postscriptName)}</span>` : ''}
+        ${face.fullName ? `<span class="tag">full: ${escapeHtml(face.fullName)}</span>` : ''}
+        ${face.style ? `<span class="tag">style: ${escapeHtml(face.style)}</span>` : ''}
+        ${face.postscriptName ? `<span class="tag">ps: ${escapeHtml(face.postscriptName)}</span>` : ''}
       </div>
       <div class="status">
           <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
