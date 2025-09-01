@@ -14,12 +14,12 @@
   header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter: blur(6px);}
   .wrap{max-width:1200px;margin:0 auto;padding:16px;}
   .bar{display:grid;gap:10px;grid-template-columns: 1fr; }
-  @media(min-width:900px){ .bar{grid-template-columns: 1fr auto auto auto; align-items:end;} }
+  @media(min-width:900px){ .bar{grid-template-columns: 1fr; }}
   h1{margin:0 0 8px;font-size:20px;letter-spacing:.3px}
   .hint{color:var(--muted);font-size:12px;margin-top:4px}
   .panel{background:var(--panel);border-radius:16px;padding:14px;box-shadow: 0 8px 24px rgba(0,0,0,.25);}
   .controls{display:grid;gap:12px;grid-template-columns: 1fr;}
-  @media(min-width:900px){ .controls{grid-template-columns: 1fr 200px 220px 200px;align-items:end;} }
+  @media(min-width:900px){ .controls{grid-template-columns: 200px 1fr;align-items:end;} }
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
   input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none}
   input[type="range"]{width:100%}
@@ -69,18 +69,29 @@
   <main class="wrap">
     <section class="panel">
       <div class="bar">
+        <div class="toolbar">
+          <button id="load" class="btn primary">🔎 ローカルフォントを読み込む</button>
+          <button id="import" class="btn ghost">📥 インポート</button>
+          <button id="export" class="btn">💾 必要なフォント一覧をダウンロード</button>
+          <label class="chip" title="エクスポート形式（txtの中身）">
+            <span>書き出し: </span>
+            <select id="exportMode">
+              <option value="family" selected>ファミリ名</option>
+              <option value="full">フルネーム</option>
+              <option value="ps">PostScript名</option>
+            </select>
+          </label>
+          <input id="file" type="file" accept=".txt" class="sr" />
+        </div>
+
         <div class="controls">
           <div>
-            <label class="small">検索（ファミリ名・PostScript・フルネーム）</label>
-            <input id="q" type="text" placeholder="例: Noto, Yu Gothic, meiryo" />
+            <label class="small">サイズ <span id="sizeLabel">32px</span></label>
+            <input id="size" type="range" min="10" max="120" value="32" />
           </div>
           <div>
             <label class="small">プレビュー文字</label>
             <input id="sample" type="text" value="The quick brown fox あいうえお 0123456789" />
-          </div>
-          <div>
-            <label class="small">サイズ <span id="sizeLabel">32px</span></label>
-            <input id="size" type="range" min="10" max="120" value="32" />
           </div>
           <div>
             <label class="small">表示モード</label>
@@ -91,16 +102,14 @@
               <option value="drop">不要のみ</option>
             </select>
           </div>
-        </div>
-
-        <div class="toolbar">
-          <button id="load" class="btn primary">🔎 ローカルフォントを読み込む</button>
-          <button id="export" class="btn">💾 必要なフォント一覧をダウンロード</button>
-          <button id="import" class="btn ghost">📥 インポート</button>
-          <input id="file" type="file" accept=".txt" class="sr" />
+          <div>
+            <label class="small">検索（ファミリ名・PostScript・フルネーム）</label>
+            <input id="q" type="text" placeholder="例: Noto, Yu Gothic, meiryo" />
+          </div>
         </div>
 
         <div class="chips">
+          <button id="reset" class="btn ghost">🔄 仕分けリセット</button>
           <label class="chip" title="ファミリ単位で仕分け">
             <input id="group" type="checkbox" checked />
             <span>ファミリ単位</span>
@@ -109,15 +118,6 @@
             <input id="lazy" type="checkbox" checked />
             <span>遅延描画</span>
           </label>
-          <label class="chip" title="エクスポート形式（txtの中身）">
-            <span>書き出し: </span>
-            <select id="exportMode">
-              <option value="family" selected>ファミリ名</option>
-              <option value="full">フルネーム</option>
-              <option value="ps">PostScript名</option>
-            </select>
-          </label>
-          <button id="reset" class="btn ghost">🔄 仕分けリセット</button>
         </div>
       </div>
 
