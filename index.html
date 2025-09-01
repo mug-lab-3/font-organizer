@@ -64,6 +64,7 @@
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
 <body>
   <header>
@@ -118,6 +119,7 @@
   </main>
 
 <script>
+/* global opentype */
 (() => {
   'use strict';
 
@@ -201,8 +203,8 @@
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
-   * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string}} FontLike
-   */
+  * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string}} FontLike
+  */
 
   // ---- UI wiring -----------------------------------------------------------
   qEl.addEventListener('input', () => { state.query = qEl.value.trim().toLowerCase(); applyFilterAndRender(true); savePrefs(); });
@@ -222,17 +224,17 @@
     const file = fileInput.files && fileInput.files[0];
     if (!file) return;
     const text = await file.text();
-    const names = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
+    const families = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
     const matchedFamilies = new Set();
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
-      if (names.has(f.family) || names.has(f.postscriptName) || names.has(f.fullName)) {
+      if (families.has(f.family)) {
         state.decisions[kFam] = 'keep';
         matchedFamilies.add(f.family);
       }
     }
-      saveDecisions();
-      alert(`読み込み完了: ${matchedFamilies.size}件を「必要」に設定しました`);
+    saveDecisions();
+    alert(`読み込み完了: ${matchedFamilies.size}件を「必要」に設定しました`);
     // Imported decisions may alter earlier pages; reset to start
     applyFilterAndRender(true);
     fileInput.value = '';
@@ -242,11 +244,9 @@
     const keepSet = new Set();
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
-      const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
-      const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
-      if (kept) keepSet.add(f.family);
+      if (state.decisions[kFam] === 'keep') keepSet.add(f.family);
     }
-    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'ja'));
+    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'en'));
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a');
     a.download = 'davinci_resolve_fonts.txt';
@@ -299,9 +299,26 @@
     }
 
     // Normalize & sort
-    state.fonts = fonts
-      .map(f => ({ family: f.family, fullName: f.fullName || '', postscriptName: f.postscriptName || '', style: f.style || '' }))
-      .sort((a,b)=> a.family.localeCompare(b.family,'ja') || (a.fullName||'').localeCompare(b.fullName||'','ja'));
+    const enriched = [];
+    for (const f of fonts) {
+      let otName = '', otFamily = '';
+      try {
+        const blob = await f.blob();
+        const font = opentype.parse(await blob.arrayBuffer());
+        const enFull = englishName(font?.names?.fullName);
+        const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
+        otName = enFull;
+        otFamily = enFam;
+      } catch {}
+      enriched.push({
+        family: otFamily || f.family,
+        fullName: otName || f.fullName || '',
+        postscriptName: f.postscriptName || '',
+        style: f.style || '',
+      });
+    }
+    state.fonts = enriched
+      .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
     const familyCount = new Set(state.fonts.map(f => f.family)).size;
     status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
     applyFilterAndRender(true);
@@ -440,12 +457,12 @@
     const title = document.createElement('div');
     title.className = 'row';
     title.innerHTML = `
-      <div>
+      <div class="meta">
         <strong>${escapeHtml(face.family)}</strong>
       </div>
       <div class="status">
-          <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
-          <button class="pill drop" aria-pressed="${d==='drop'}">不要</button>
+        <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
+        <button class="pill drop" aria-pressed="${d==='drop'}">不要</button>
       </div>
     `;
     const preview = document.createElement('div');
@@ -533,6 +550,11 @@
     statusEl.innerHTML = isErr
       ? `<span class="danger"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span>${escapeHtml(msg)}</span></span>`
       : `<span class="ok"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>${escapeHtml(msg)}</span></span>`;
+  }
+
+  function englishName(rec){
+    if (!rec) return '';
+    return rec.en || rec.enUS || rec['en-US'] || rec['en-us'] || Object.values(rec)[0] || '';
   }
 
   function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
