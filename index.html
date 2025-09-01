@@ -7,12 +7,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 <style>
   :root {
-    --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --accent:#65c3ff;
+    --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --primary:#ac00ac;
     --keep:#2ecc71; --drop:#ff6b6b; --chip:#222735;
   }
-  html,body{height:100%;}
+    html,body{min-height:100%;}
   body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;}
-  header{background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter: blur(6px);}
+  header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter:blur(6px);}
+  header .wrap{display:flex;align-items:flex-start;gap:16px;}
+  .title-block{flex:1;}
   .wrap{max-width:1200px;margin:0 auto;padding:16px;}
   .bar{display:grid;gap:10px;grid-template-columns: 1fr; }
   @media(min-width:900px){ .bar{grid-template-columns: 1fr; }}
@@ -23,7 +25,7 @@
   @media(min-width:900px){ .controls{grid-template-columns: 200px 1fr;align-items:end;} }
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
   input[type="text"], select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none;box-sizing:border-box}
-  input[type="range"]{width:100%}
+  input[type="range"]{width:100%;accent-color:var(--primary)}
   .btn{appearance:none;border:1px solid #2a3040;border-radius:12px;padding:10px 14px;background:var(--chip);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn input{margin:0;}
@@ -46,7 +48,7 @@
   .pill{padding:8px 14px;border-radius:12px;font-size:13px;cursor:pointer;user-select:none;background:var(--chip);color:var(--ink);border:1px solid #2a3040}
   .empty{padding:24px;text-align:center;color:var(--muted)}
   footer{padding:24px 16px;color:var(--muted);text-align:center}
-  .accent{color:var(--accent)}
+  .accent{color:var(--primary)}
   .danger{color:#ff8b8b;display:inline-flex;align-items:center;gap:4px}
   .ok{color:#6ff7a8;display:inline-flex;align-items:center;gap:4px}
   details summary{cursor:pointer;opacity:.9}
@@ -56,13 +58,19 @@
   @keyframes flashDrop{from{background:rgba(255,107,107,.2);}to{background:#0e1120;}}
   .sr{position:absolute;left:-9999px}
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
+    .x-link{margin-left:auto;text-decoration:none;padding:6px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary);background:transparent;color:#fff;}
+  .x-link:hover{opacity:.8}
+  .x-link img{width:24px;height:24px;border-radius:50%;}
 </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <h1>Local Font Organizer</h1>
-      <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで利用できるフォント整理アプリです。最初に権限を許可してください。</div>
+      <div class="title-block">
+        <h1>Local Font Organizer</h1>
+        <div class="hint">Chrome / Edge など <code>Local Font Access</code> 対応ブラウザで利用できるフォント整理アプリです。最初に権限を許可してください。</div>
+      </div>
+      <a class="x-link" href="https://x.com/MugLab3" target="_blank" rel="noopener noreferrer"><img src="https://unavatar.io/github/mug-lab-3" alt="MugLab3 icon" />MugLab3 on X</a>
     </div>
   </header>
 
