@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 <style>
   :root {
-    --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --primary:#ac00ac;
+    --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --primary:#ac00ac; --accent:#AE75DA;
     --keep:#2ecc71; --drop:#ff6b6b; --chip:#222735;
   }
     html,body{min-height:100%;}
@@ -39,8 +39,8 @@
   .card{background:#0e1120;border:1px solid #1f2740;border-radius:16px;padding:14px;display:grid;gap:10px}
   .meta{display:flex;gap:8px;flex-wrap:wrap}
   .meta .names{display:flex;flex-direction:column;line-height:1.2}
-  .meta .names strong{font-size:1.4rem}
-  .meta .sub{font-size:12px;color:var(--muted)}
+  .meta .names strong{font-size:1.4rem;color:var(--accent)}
+  .meta .sub{font-size:1.05rem;color:var(--muted)}
   .tag{font-size:12px;background:#12172a;border:1px solid #1e2540;padding:2px 8px;border-radius:999px;color:var(--muted)}
   .preview{min-height:48px;border-radius:10px;padding:12px;background:#0b0f1e;border:1px dashed #26304d;overflow-wrap:anywhere;word-break:break-word;box-sizing:border-box}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
@@ -53,7 +53,7 @@
   .pill{padding:8px 14px;border-radius:12px;font-size:0.975rem;cursor:pointer;user-select:none;background:var(--chip);color:var(--ink);border:1px solid #2a3040}
   .empty{padding:24px;text-align:center;color:var(--muted)}
   footer{padding:24px 16px;color:var(--muted);text-align:center}
-  .accent{color:var(--primary)}
+  .accent{color:var(--accent)}
   .danger{color:#ff8b8b;display:inline-flex;align-items:center;gap:4px}
   .ok{color:#6ff7a8;display:inline-flex;align-items:center;gap:4px}
   details summary{cursor:pointer;opacity:.9}
