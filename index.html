@@ -65,6 +65,8 @@
     .x-link{margin-left:auto;text-decoration:none;padding:6px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary);background:transparent;color:#fff;}
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
+  .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000;font-size:18px;}
+  .loading[hidden]{display:none;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
@@ -120,6 +122,10 @@
     </section>
   </main>
 
+  <div id="loading" class="loading" hidden>
+    <span id="loadingText">読み込み中…</span>
+  </div>
+
 <script>
 /* global opentype */
 (() => {
@@ -132,8 +138,8 @@
     page: 0,
     pageSize: 80,
     decisions: loadDecisions(), // { key: 'keep'|'drop' }
-    sampleText: 'The quick brown fox あいうえお 0123456789',
-    sizePx: 32,
+    sampleText: 'Tabcgxyz ABCJZ 0123 #$%!? あいう 亜伊宇',
+    sizePx: 24,
     filter: 'all',
     query: '',
     supported: {
@@ -183,6 +189,21 @@
   const importBtn = /** @type {HTMLButtonElement} */($('#import'));
   const fileInput = /** @type {HTMLInputElement} */($('#file'));
   const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
+  const loadingEl = $('#loading');
+  const loadingTextEl = $('#loadingText');
+
+  function setUIEnabled(enabled) {
+    document.querySelectorAll('button, input, select').forEach(el => {
+      el.disabled = !enabled;
+    });
+  }
+  function showLoading(msg = '') {
+    loadingTextEl.textContent = msg;
+    loadingEl.hidden = false;
+  }
+  function hideLoading() {
+    loadingEl.hidden = true;
+  }
 
   const prefs = loadPrefs();
   if (typeof prefs.sizePx === 'number') {
@@ -263,70 +284,80 @@
 
   // ---- Data loading --------------------------------------------------------
   async function loadFonts() {
+    setUIEnabled(false);
+    showLoading('読み込み中…');
     listEl.innerHTML = '';
     endEl.textContent = '';
-      status('ローカルフォントの列挙を開始します…');
+    status('ローカルフォントの列挙を開始します…');
 
-    // Try permission hint (optional)
     try {
-      if (navigator.permissions) {
-        // Not all UAs implement this name, so ignore errors
-        // @ts-ignore
-        const p = await navigator.permissions.query({name:'local-fonts'});
-        if (p && p.state === 'denied') {
+      // Try permission hint (optional)
+      try {
+        if (navigator.permissions) {
+          // Not all UAs implement this name, so ignore errors
+          // @ts-ignore
+          const p = await navigator.permissions.query({name:'local-fonts'});
+          if (p && p.state === 'denied') {
             status('権限が拒否されています。アドレスバー左のアイコンから許可してください。', true);
+          }
         }
-      }
-    } catch {}
+      } catch {}
 
-    /** @type {Array<FontLike>} */
-    let fonts = [];
-    try {
-      if ('queryLocalFonts' in window) {
-        // @ts-ignore
-        fonts = await window.queryLocalFonts();
-      } else if (navigator.fonts && 'query' in navigator.fonts) {
-        // @ts-ignore older API returns async iterator
-        for await (const md of navigator.fonts.query()) {
-          fonts.push(md);
+      /** @type {Array<FontLike>} */
+      let fonts = [];
+      try {
+        if ('queryLocalFonts' in window) {
+          // @ts-ignore
+          fonts = await window.queryLocalFonts();
+        } else if (navigator.fonts && 'query' in navigator.fonts) {
+          // @ts-ignore older API returns async iterator
+          for await (const md of navigator.fonts.query()) {
+            fonts.push(md);
+          }
+        } else {
+          unsupportedMessage();
+          return;
         }
-      } else {
-        unsupportedMessage();
-        return;
-      }
-    } catch (e) {
+      } catch (e) {
         console.error(e);
         status('権限が許可されなかったか、ポリシーでブロックされています。Chromeの設定を確認してください。', true);
-      return;
-    }
+        return;
+      }
 
-    // Normalize & sort
-    const enriched = [];
-    for (const f of fonts) {
-      let otName = '', otFamily = '', jaFamily = '';
-      try {
-        const blob = await f.blob();
-        const font = opentype.parse(await blob.arrayBuffer());
-        const enFull = englishName(font?.names?.fullName);
-        const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
-        const jaFam = japaneseName(font?.names?.preferredFamily) || japaneseName(font?.names?.fontFamily);
-        otName = enFull;
-        otFamily = enFam;
-        jaFamily = jaFam;
-      } catch {}
-      enriched.push({
-        family: otFamily || f.family,
-        familyJa: jaFamily || '',
-        fullName: otName || f.fullName || '',
-        postscriptName: f.postscriptName || '',
-        style: f.style || '',
-      });
+      progressStatus(`読み込み中… 0/${fonts.length}`);
+      // Normalize & sort
+      const enriched = [];
+      for (let i = 0; i < fonts.length; i++) {
+        const f = fonts[i];
+        let otName = '', otFamily = '', jaFamily = '';
+        try {
+          const blob = await f.blob();
+          const font = opentype.parse(await blob.arrayBuffer());
+          const enFull = englishName(font?.names?.fullName);
+          const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
+          const jaFam = japaneseName(font?.names?.preferredFamily) || japaneseName(font?.names?.fontFamily);
+          otName = enFull;
+          otFamily = enFam;
+        } catch {}
+        enriched.push({
+          family: otFamily || f.family,
+          familyJa: jaFamily || '',
+          fullName: otName || f.fullName || '',
+          postscriptName: f.postscriptName || '',
+          style: f.style || '',
+        });
+        progressStatus(`読み込み中… ${i + 1}/${fonts.length}`);
+        await new Promise(r => setTimeout(r));
+      }
+      state.fonts = enriched
+        .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
+      const familyCount = new Set(state.fonts.map(f => f.family)).size;
+      status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
+      applyFilterAndRender(true);
+    } finally {
+      hideLoading();
+      setUIEnabled(true);
     }
-    state.fonts = enriched
-      .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
-    const familyCount = new Set(state.fonts.map(f => f.family)).size;
-    status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
-    applyFilterAndRender(true);
   }
 
   function unsupportedMessage() {
@@ -559,6 +590,11 @@
     statusEl.innerHTML = isErr
       ? `<span class="danger"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span>${escapeHtml(msg)}</span></span>`
       : `<span class="ok"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>${escapeHtml(msg)}</span></span>`;
+  }
+
+  function progressStatus(msg) {
+    statusEl.textContent = msg;
+    loadingTextEl.textContent = msg;
   }
 
   function englishName(rec){
