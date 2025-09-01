@@ -102,10 +102,6 @@
 
         <div class="chips">
           <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
-          <label class="btn" title="プレビューの軽量化（読み込み時に徐々に表示）">
-            <input id="lazy" type="checkbox" checked />
-            <span>遅延描画</span>
-          </label>
         </div>
       </div>
 
@@ -135,7 +131,6 @@
     page: 0,
     pageSize: 80,
     decisions: loadDecisions(), // { key: 'keep'|'drop' }
-    lazy: true,
     sampleText: 'The quick brown fox あいうえお 0123456789',
     sizePx: 32,
     filter: 'all',
@@ -173,7 +168,6 @@
   const importBtn = /** @type {HTMLButtonElement} */($('#import'));
   const fileInput = /** @type {HTMLInputElement} */($('#file'));
   const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
-  const lazyChk = /** @type {HTMLInputElement} */($('#lazy'));
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
@@ -185,7 +179,6 @@
   sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); });
   sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); });
   filterEl.addEventListener('change', () => { state.filter = filterEl.value; applyFilterAndRender(true); });
-  lazyChk.addEventListener('change', () => { state.lazy = lazyChk.checked; applyFilterAndRender(true); });
 
     resetBtn.addEventListener('click', () => {
       if (!confirm('仕分け結果をすべてリセットしますか？')) return;
@@ -356,12 +349,6 @@
     } else {
       endEl.textContent = '';
     }
-    if (!state.lazy && previewObserver) {
-      previewObserver.disconnect();
-      previewObserver = null;
-      visiblePreviews.clear();
-    }
-
     const start = state.page * state.pageSize;
     const end = Math.min(start + state.pageSize, state.filtered.length);
     const frag = document.createDocumentFragment();
@@ -374,46 +361,30 @@
     }
     listEl.appendChild(frag);
 
-    if (state.lazy) {
-      if (!previewObserver) {
-        previewObserver = new IntersectionObserver(handlePreviewIntersect, {rootMargin: '200px 0px'});
-      }
-      for (const c of cards) {
-        const p = c.querySelector('.preview');
-        if (p) previewObserver.observe(p);
-      }
-    } else {
-      for (const c of cards) {
-        const p = c.querySelector('.preview');
-        if (p) renderPreview(p);
-      }
+    if (!previewObserver) {
+      previewObserver = new IntersectionObserver(handlePreviewIntersect, {rootMargin: '200px 0px'});
+    }
+    for (const c of cards) {
+      const p = c.querySelector('.preview');
+      if (p) previewObserver.observe(p);
     }
 
-    if (state.lazy) {
-      if (io) io.disconnect();
-      io = new IntersectionObserver(entries => {
-        if (entries.some(e => e.isIntersecting)) {
-          io.disconnect();
-          if ((state.page + 1) * state.pageSize < state.filtered.length) {
-            state.page++;
-            renderPage(false);
-          } else {
-              endEl.textContent = 'これ以上ありません。';
-          }
+    if (io) io.disconnect();
+    io = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) {
+        io.disconnect();
+        if ((state.page + 1) * state.pageSize < state.filtered.length) {
+          state.page++;
+          renderPage(false);
+        } else {
+            endEl.textContent = 'これ以上ありません。';
         }
-      }, {rootMargin: '800px 0px'});
-      const sentinel = document.createElement('div');
-      sentinel.style.height = '1px';
-      listEl.appendChild(sentinel);
-      io.observe(sentinel);
-    } else {
-      // render all
-      while ((state.page + 1) * state.pageSize < state.filtered.length) {
-        state.page++;
-        renderPage(false);
       }
-        endEl.textContent = 'これ以上ありません。';
-    }
+    }, {rootMargin: '800px 0px'});
+    const sentinel = document.createElement('div');
+    sentinel.style.height = '1px';
+    listEl.appendChild(sentinel);
+    io.observe(sentinel);
 
     refreshSamples();
   }
@@ -495,12 +466,7 @@
   }
 
   function refreshSamples() {
-    if (state.lazy) {
-      visiblePreviews.forEach(el => renderPreview(el));
-    } else {
-      const previews = listEl.querySelectorAll('.preview');
-      previews.forEach(el => renderPreview(el));
-    }
+    visiblePreviews.forEach(el => renderPreview(el));
   }
 
   function renderPreview(el) {
