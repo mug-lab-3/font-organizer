@@ -21,7 +21,7 @@
   .controls{display:grid;gap:12px;grid-template-columns: 1fr;}
   @media(min-width:900px){ .controls{grid-template-columns: 200px 1fr;align-items:end;} }
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
-  input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none}
+  input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none;box-sizing:border-box}
   input[type="range"]{width:100%}
   .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#1f2433;color:var(--ink);cursor:pointer}
   .btn.primary{background:var(--accent);color:#072233;font-weight:700}
