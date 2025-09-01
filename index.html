@@ -13,16 +13,17 @@
   body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;}
   header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,0));backdrop-filter: blur(6px);}
   .wrap{max-width:1200px;margin:0 auto;padding:16px;}
-  .bar{display:grid;gap:10px;grid-template-columns: 1fr; }
-  @media(min-width:900px){ .bar{grid-template-columns: 1fr auto auto auto; align-items:end;} }
+  .bar{display:flex;flex-direction:column;gap:10px;}
+  @media(min-width:900px){ .bar{flex-direction:row;align-items:flex-start;flex-wrap:wrap;} }
   h1{margin:0 0 8px;font-size:20px;letter-spacing:.3px}
   .hint{color:var(--muted);font-size:12px;margin-top:4px}
   .panel{background:var(--panel);border-radius:16px;padding:14px;box-shadow: 0 8px 24px rgba(0,0,0,.25);}
-  .controls{display:grid;gap:12px;grid-template-columns: 1fr;}
-  @media(min-width:900px){ .controls{grid-template-columns: 1fr 200px 220px 200px;align-items:end;} }
-  label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
-  input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none}
-  input[type="range"]{width:100%}
+  .control-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;flex:1 1 100%;}
+  .field{display:flex;flex-direction:column;}
+  .field label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .control-grid input[type="text"],
+  .control-grid select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none}
+  .control-grid input[type="range"]{width:100%}
   .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#1f2433;color:var(--ink);cursor:pointer}
   .btn.primary{background:var(--accent);color:#072233;font-weight:700}
   .btn.ghost{background:transparent;outline:1px solid #2a3040}
@@ -69,21 +70,21 @@
   <main class="wrap">
     <section class="panel">
       <div class="bar">
-        <div class="controls">
-          <div>
-            <label class="small">検索（ファミリ名・PostScript・フルネーム）</label>
+        <div class="control-grid">
+          <div class="field search">
+            <label for="q">検索（ファミリ名・PostScript・フルネーム）</label>
             <input id="q" type="text" placeholder="例: Noto, Yu Gothic, meiryo" />
           </div>
-          <div>
-            <label class="small">プレビュー文字</label>
+          <div class="field sample">
+            <label for="sample">プレビュー文字</label>
             <input id="sample" type="text" value="The quick brown fox あいうえお 0123456789" />
           </div>
-          <div>
-            <label class="small">サイズ <span id="sizeLabel">32px</span></label>
+          <div class="field size">
+            <label for="size">サイズ <span id="sizeLabel">32px</span></label>
             <input id="size" type="range" min="10" max="120" value="32" />
           </div>
-          <div>
-            <label class="small">表示モード</label>
+          <div class="field mode">
+            <label for="filter">表示モード</label>
             <select id="filter">
               <option value="all">すべて</option>
               <option value="undecided">未決</option>
