@@ -203,8 +203,8 @@
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
-   * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string, otName?:string}} FontLike
-   */
+  * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string, otName?:string, otFamily?:string}} FontLike
+  */
 
   // ---- UI wiring -----------------------------------------------------------
   qEl.addEventListener('input', () => { state.query = qEl.value.trim().toLowerCase(); applyFilterAndRender(true); savePrefs(); });
@@ -303,12 +303,13 @@
     // Normalize & sort
     const enriched = [];
     for (const f of fonts) {
-      let otName = '';
+      let otName = '', otFamily = '';
       try {
         const blob = await f.blob();
         const font = opentype.parse(await blob.arrayBuffer());
-        otName = font?.names?.fullName?.ja || font?.names?.fullName?.en ||
-                 font?.names?.fontFamily?.ja || font?.names?.fontFamily?.en || '';
+        otName = font?.names?.fullName?.ja || font?.names?.fullName?.en || '';
+        otFamily = font?.names?.preferredFamily?.ja || font?.names?.preferredFamily?.en ||
+                   font?.names?.fontFamily?.ja || font?.names?.fontFamily?.en || '';
       } catch {}
       enriched.push({
         family: f.family,
@@ -316,6 +317,7 @@
         postscriptName: f.postscriptName || '',
         style: f.style || '',
         otName,
+        otFamily,
       });
     }
     state.fonts = enriched
@@ -463,9 +465,10 @@
         ${face.fullName ? `<span class="tag">full: ${escapeHtml(face.fullName)}</span>` : ''}
         ${face.style ? `<span class="tag">style: ${escapeHtml(face.style)}</span>` : ''}
         ${face.postscriptName ? `<span class="tag">ps: ${escapeHtml(face.postscriptName)}</span>` : ''}
+        ${face.otFamily ? `<span class="tag">otFam: ${escapeHtml(face.otFamily)}</span>` : ''}
         ${face.otName ? `<span class="tag">name: ${escapeHtml(face.otName)}</span>` : ''}
-      </div>
-      <div class="status">
+        </div>
+        <div class="status">
           <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
           <button class="pill drop" aria-pressed="${d==='drop'}">不要</button>
       </div>
