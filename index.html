@@ -73,14 +73,6 @@
             <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
             <button id="import" class="btn"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
             <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
-          <label class="btn" title="エクスポート形式（txtの中身）">
-            <span>書き出し: </span>
-            <select id="exportMode">
-              <option value="family" selected>ファミリ名</option>
-              <option value="full">フルネーム</option>
-              <option value="ps">PostScript名</option>
-            </select>
-          </label>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
 
@@ -110,10 +102,6 @@
 
         <div class="chips">
           <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
-          <label class="btn" title="ファミリ単位で仕分け">
-            <input id="group" type="checkbox" checked />
-            <span>ファミリ単位</span>
-          </label>
           <label class="btn" title="プレビューの軽量化（読み込み時に徐々に表示）">
             <input id="lazy" type="checkbox" checked />
             <span>遅延描画</span>
@@ -147,9 +135,7 @@
     page: 0,
     pageSize: 80,
     decisions: loadDecisions(), // { key: 'keep'|'drop' }
-    groupByFamily: true,
     lazy: true,
-    exportMode: 'family',
     sampleText: 'The quick brown fox あいうえお 0123456789',
     sizePx: 32,
     filter: 'all',
@@ -161,8 +147,8 @@
   };
 
   // Key helpers
-  function keyFor(face, grouped) {
-    return grouped ? `fam:${face.family}` : `ps:${face.postscriptName || face.fullName || face.family}`;
+  function keyFor(face) {
+    return `fam:${face.family}`;
   }
   function saveDecisions() {
     localStorage.setItem('font-organizer:v1', JSON.stringify(state.decisions));
@@ -187,9 +173,7 @@
   const importBtn = /** @type {HTMLButtonElement} */($('#import'));
   const fileInput = /** @type {HTMLInputElement} */($('#file'));
   const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
-  const groupChk = /** @type {HTMLInputElement} */($('#group'));
   const lazyChk = /** @type {HTMLInputElement} */($('#lazy'));
-  const exportModeSel = /** @type {HTMLSelectElement} */($('#exportMode'));
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
@@ -201,9 +185,7 @@
   sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); });
   sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); });
   filterEl.addEventListener('change', () => { state.filter = filterEl.value; applyFilterAndRender(true); });
-  groupChk.addEventListener('change', () => { state.groupByFamily = groupChk.checked; applyFilterAndRender(true); });
   lazyChk.addEventListener('change', () => { state.lazy = lazyChk.checked; applyFilterAndRender(true); });
-  exportModeSel.addEventListener('change', () => { state.exportMode = exportModeSel.value; });
 
     resetBtn.addEventListener('click', () => {
       if (!confirm('仕分け結果をすべてリセットしますか？')) return;
@@ -218,13 +200,11 @@
     if (!file) return;
     const text = await file.text();
     const names = new Set(text.split(/\r?\n/).map(s => s.trim()).filter(Boolean));
-    // どのキーで照合するかは exportMode に合わせず「賢く」統合
     let matched = 0;
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
-      const kPS  = `ps:${f.postscriptName || f.fullName || f.family}`;
       if (names.has(f.family) || names.has(f.postscriptName) || names.has(f.fullName)) {
-        state.decisions[state.groupByFamily ? kFam : kPS] = 'keep';
+        state.decisions[kFam] = 'keep';
         matched++;
       }
     }
@@ -236,34 +216,17 @@
 
   exportBtn.addEventListener('click', () => {
     const keepSet = new Set();
-    if (state.exportMode === 'family') {
-      // family 単位
-      for (const f of state.fonts) {
-        const kFam = `fam:${f.family}`;
-        const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
-        const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
-        if (kept) keepSet.add(f.family);
-      }
-    } else if (state.exportMode === 'full') {
-      for (const f of state.fonts) {
-        const kFam = `fam:${f.family}`;
-        const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
-        const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
-        if (kept && f.fullName) keepSet.add(f.fullName);
-      }
-    } else {
-      for (const f of state.fonts) {
-        const kFam = `fam:${f.family}`;
-        const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
-        const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
-        if (kept) keepSet.add(f.postscriptName || f.fullName || f.family);
-      }
+    for (const f of state.fonts) {
+      const kFam = `fam:${f.family}`;
+      const kPS = `ps:${f.postscriptName || f.fullName || f.family}`;
+      const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
+      if (kept) keepSet.add(f.family);
     }
     const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'ja'));
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a');
     const ts = new Date().toISOString().replace(/[:.]/g,'-');
-    a.download = `kept-fonts_${state.exportMode}_${ts}.txt`;
+    a.download = `kept-fonts_${ts}.txt`;
     a.href = URL.createObjectURL(blob);
     a.click();
     URL.revokeObjectURL(a.href);
@@ -340,7 +303,7 @@
     let arr = state.fonts;
 
     // Group by family (choose representative face)
-    if (state.groupByFamily) {
+    {
       const map = new Map();
       for (const f of arr) {
         if (!map.has(f.family)) map.set(f.family, f);
@@ -364,7 +327,7 @@
 
     // Status filter
     const filtered = arr.filter(f => {
-      const k = keyFor(f, state.groupByFamily);
+      const k = keyFor(f);
       const d = state.decisions[k];
       if (state.filter === 'keep') return d === 'keep';
       if (state.filter === 'drop') return d === 'drop';
@@ -426,7 +389,7 @@
   }
 
   function renderCard(face) {
-    const k = keyFor(face, state.groupByFamily);
+    const k = keyFor(face);
     const d = state.decisions[k]; // 'keep' | 'drop' | undefined
     const card = document.createElement('div');
     card.className = 'card';
