@@ -69,7 +69,19 @@
   .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000;font-size:18px;}
   .loading[hidden]{display:none;}
   .spin{position:relative;}
-  .spin::before{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,var(--primary),transparent 60%,var(--primary));animation:spinBorder 1.5s linear infinite;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+  .spin::before{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    border-radius:inherit;
+    padding:2px;
+    background:conic-gradient(from 0deg, transparent 0deg 355deg, var(--primary) 355deg 360deg);
+    animation:spinBorder 1.5s linear infinite;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    pointer-events:none;
+  }
   @keyframes spinBorder{to{transform:rotate(360deg);}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
