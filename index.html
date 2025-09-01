@@ -298,9 +298,11 @@
       return;
     }
 
+    progressStatus(`読み込み中… 0/${fonts.length}`);
     // Normalize & sort
     const enriched = [];
-    for (const f of fonts) {
+    for (let i = 0; i < fonts.length; i++) {
+      const f = fonts[i];
       let otName = '', otFamily = '';
       try {
         const blob = await f.blob();
@@ -316,6 +318,8 @@
         postscriptName: f.postscriptName || '',
         style: f.style || '',
       });
+      progressStatus(`読み込み中… ${i + 1}/${fonts.length}`);
+      await new Promise(r => setTimeout(r));
     }
     state.fonts = enriched
       .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
@@ -550,6 +554,10 @@
     statusEl.innerHTML = isErr
       ? `<span class="danger"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span>${escapeHtml(msg)}</span></span>`
       : `<span class="ok"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>${escapeHtml(msg)}</span></span>`;
+  }
+
+  function progressStatus(msg) {
+    statusEl.textContent = msg;
   }
 
   function englishName(rec){
