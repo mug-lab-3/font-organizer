@@ -64,6 +64,7 @@
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
 <body>
   <header>
@@ -118,6 +119,7 @@
   </main>
 
 <script>
+/* global opentype */
 (() => {
   'use strict';
 
@@ -201,7 +203,7 @@
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
-   * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string}} FontLike
+   * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string, otName?:string}} FontLike
    */
 
   // ---- UI wiring -----------------------------------------------------------
@@ -299,8 +301,24 @@
     }
 
     // Normalize & sort
-    state.fonts = fonts
-      .map(f => ({ family: f.family, fullName: f.fullName || '', postscriptName: f.postscriptName || '', style: f.style || '' }))
+    const enriched = [];
+    for (const f of fonts) {
+      let otName = '';
+      try {
+        const blob = await f.blob();
+        const font = opentype.parse(await blob.arrayBuffer());
+        otName = font?.names?.fullName?.ja || font?.names?.fullName?.en ||
+                 font?.names?.fontFamily?.ja || font?.names?.fontFamily?.en || '';
+      } catch {}
+      enriched.push({
+        family: f.family,
+        fullName: f.fullName || '',
+        postscriptName: f.postscriptName || '',
+        style: f.style || '',
+        otName,
+      });
+    }
+    state.fonts = enriched
       .sort((a,b)=> a.family.localeCompare(b.family,'ja') || (a.fullName||'').localeCompare(b.fullName||'','ja'));
     const familyCount = new Set(state.fonts.map(f => f.family)).size;
     status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
@@ -445,6 +463,7 @@
         ${face.fullName ? `<span class="tag">full: ${escapeHtml(face.fullName)}</span>` : ''}
         ${face.style ? `<span class="tag">style: ${escapeHtml(face.style)}</span>` : ''}
         ${face.postscriptName ? `<span class="tag">ps: ${escapeHtml(face.postscriptName)}</span>` : ''}
+        ${face.otName ? `<span class="tag">name: ${escapeHtml(face.otName)}</span>` : ''}
       </div>
       <div class="status">
           <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
