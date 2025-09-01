@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Local Font Organizer — 1ファイル版</title>
+<title>Local Font Organizer</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 <style>
   :root {
@@ -20,7 +20,7 @@
   .hint{color:var(--muted);font-size:12px;margin-top:4px}
   .panel{background:var(--panel);border-radius:16px;padding:14px;box-shadow: 0 8px 24px rgba(0,0,0,.25);}
   .controls{display:grid;gap:12px;grid-template-columns: 1fr;}
-  @media(min-width:640px){ .controls{grid-template-columns: 200px 1fr;align-items:end;} }
+  @media(min-width:900px){ .controls{grid-template-columns: 200px 1fr;align-items:end;} }
   .controls > div{min-width:0;}
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
   input[type="text"], select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #2a3040;background:#0f1320;color:var(--ink);outline:none;box-sizing:border-box;min-width:0}
@@ -71,10 +71,10 @@
     <section class="panel">
       <div class="bar">
         <div class="toolbar">
-            <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
+            <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>フォント読み込み</span></button>
             <button id="import" class="btn"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
-            <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
-            <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
+            <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>ダウンロード</span></button>
+            <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>リセット</span></button>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
 
