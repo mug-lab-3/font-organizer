@@ -203,7 +203,7 @@
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
-  * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string, otName?:string, otFamily?:string}} FontLike
+  * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string}} FontLike
   */
 
   // ---- UI wiring -----------------------------------------------------------
@@ -317,8 +317,6 @@
         fullName: otName || f.fullName || '',
         postscriptName: f.postscriptName || '',
         style: f.style || '',
-        otName,
-        otFamily,
       });
     }
     state.fonts = enriched
@@ -463,15 +461,10 @@
     title.innerHTML = `
       <div class="meta">
         <strong>${escapeHtml(face.family)}</strong>
-        ${face.fullName ? `<span class="tag">full: ${escapeHtml(face.fullName)}</span>` : ''}
-        ${face.style ? `<span class="tag">style: ${escapeHtml(face.style)}</span>` : ''}
-        ${face.postscriptName ? `<span class="tag">ps: ${escapeHtml(face.postscriptName)}</span>` : ''}
-        ${face.otFamily ? `<span class="tag">otFam: ${escapeHtml(face.otFamily)}</span>` : ''}
-        ${face.otName ? `<span class="tag">name: ${escapeHtml(face.otName)}</span>` : ''}
-        </div>
-        <div class="status">
-          <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
-          <button class="pill drop" aria-pressed="${d==='drop'}">不要</button>
+      </div>
+      <div class="status">
+        <button class="pill keep" aria-pressed="${d==='keep'}">必要</button>
+        <button class="pill drop" aria-pressed="${d==='drop'}">不要</button>
       </div>
     `;
     const preview = document.createElement('div');
