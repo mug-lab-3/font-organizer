@@ -238,8 +238,7 @@
     const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'ja'));
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a');
-    const ts = new Date().toISOString().replace(/[:.]/g,'-');
-    a.download = `kept-fonts_${ts}.txt`;
+    a.download = 'davinci_resolve_fonts.txt';
     a.href = URL.createObjectURL(blob);
     a.click();
     URL.revokeObjectURL(a.href);
