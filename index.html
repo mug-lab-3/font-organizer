@@ -246,7 +246,7 @@
       const kept = state.decisions[kFam] === 'keep' || state.decisions[kPS] === 'keep';
       if (kept) keepSet.add(f.family);
     }
-    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'ja'));
+    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'en'));
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a');
     a.download = 'davinci_resolve_fonts.txt';
@@ -281,11 +281,12 @@
     let fonts = [];
     try {
       if ('queryLocalFonts' in window) {
+        // Prefer English family names when available
         // @ts-ignore
-        fonts = await window.queryLocalFonts();
+        fonts = await window.queryLocalFonts({ locales: ['en'] });
       } else if (navigator.fonts && 'query' in navigator.fonts) {
         // @ts-ignore older API returns async iterator
-        for await (const md of navigator.fonts.query()) {
+        for await (const md of navigator.fonts.query({ locales: ['en'] })) {
           fonts.push(md);
         }
       } else {
@@ -301,7 +302,7 @@
     // Normalize & sort
     state.fonts = fonts
       .map(f => ({ family: f.family, fullName: f.fullName || '', postscriptName: f.postscriptName || '', style: f.style || '' }))
-      .sort((a,b)=> a.family.localeCompare(b.family,'ja') || (a.fullName||'').localeCompare(b.fullName||'','ja'));
+      .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
     const familyCount = new Set(state.fonts.map(f => f.family)).size;
     status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
     applyFilterAndRender(true);
