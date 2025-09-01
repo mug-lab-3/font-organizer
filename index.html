@@ -29,7 +29,7 @@
   .btn input{margin:0;}
   .btn select{margin:0;border:0;background:transparent;color:inherit;padding:0;width:auto;}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap}
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  #reset{margin-left:auto}
   .list{margin-top:14px;display:grid;grid-template-columns:1fr;gap:10px}
   @media(min-width:700px){ .list{grid-template-columns:1fr 1fr} }
   .card{background:#0e1120;border:1px solid #1f2740;border-radius:16px;padding:14px;display:grid;gap:10px}
@@ -73,6 +73,7 @@
             <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span>ローカルフォントを読み込む</span></button>
             <button id="import" class="btn"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span>インポート</span></button>
             <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>必要なフォント一覧をダウンロード</span></button>
+            <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
 
@@ -98,10 +99,6 @@
             <label class="small">検索</label>
             <input id="q" type="text" placeholder="例: Noto, Yu Gothic, meiryo" />
           </div>
-        </div>
-
-        <div class="chips">
-          <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span>仕分けリセット</span></button>
         </div>
       </div>
 
@@ -153,6 +150,20 @@
     catch { return {}; }
   }
 
+  function savePrefs() {
+    const prefs = {
+      sampleText: state.sampleText,
+      sizePx: state.sizePx,
+      filter: state.filter,
+      query: qEl.value
+    };
+    localStorage.setItem('font-organizer:prefs', JSON.stringify(prefs));
+  }
+  function loadPrefs() {
+    try { return JSON.parse(localStorage.getItem('font-organizer:prefs') || '{}'); }
+    catch { return {}; }
+  }
+
   // ---- DOM elements --------------------------------------------------------
   const $ = (sel) => document.querySelector(sel);
   const listEl = $('#list');
@@ -169,16 +180,35 @@
   const fileInput = /** @type {HTMLInputElement} */($('#file'));
   const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
 
+  const prefs = loadPrefs();
+  if (typeof prefs.sizePx === 'number') {
+    state.sizePx = prefs.sizePx;
+    sizeEl.value = String(state.sizePx);
+    sizeLabel.textContent = `${state.sizePx}px`;
+  }
+  if (typeof prefs.sampleText === 'string') {
+    state.sampleText = prefs.sampleText;
+    sampleEl.value = prefs.sampleText;
+  }
+  if (typeof prefs.filter === 'string') {
+    state.filter = prefs.filter;
+    filterEl.value = prefs.filter;
+  }
+  if (typeof prefs.query === 'string') {
+    qEl.value = prefs.query;
+    state.query = prefs.query.trim().toLowerCase();
+  }
+
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
    * @typedef {{postscriptName?:string, fullName?:string, family:string, style?:string}} FontLike
    */
 
   // ---- UI wiring -----------------------------------------------------------
-  qEl.addEventListener('input', () => { state.query = qEl.value.trim().toLowerCase(); applyFilterAndRender(true); });
-  sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); });
-  sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); });
-  filterEl.addEventListener('change', () => { state.filter = filterEl.value; applyFilterAndRender(true); });
+  qEl.addEventListener('input', () => { state.query = qEl.value.trim().toLowerCase(); applyFilterAndRender(true); savePrefs(); });
+  sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); savePrefs(); });
+  sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); savePrefs(); });
+  filterEl.addEventListener('change', () => { state.filter = filterEl.value; applyFilterAndRender(true); savePrefs(); });
 
     resetBtn.addEventListener('click', () => {
       if (!confirm('仕分け結果をすべてリセットしますか？')) return;
