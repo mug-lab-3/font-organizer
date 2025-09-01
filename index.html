@@ -286,10 +286,12 @@
   async function loadFonts() {
     listEl.innerHTML = '';
     endEl.textContent = '';
-      status('ローカルフォントの列挙を開始します…');
+    setUIEnabled(false);
+    showLoading('ローカルフォントの列挙中…');
+    status('ローカルフォントの列挙を開始します…');
 
-    // Try permission hint (optional)
     try {
+      // Try permission hint (optional)
       if (navigator.permissions) {
         // Not all UAs implement this name, so ignore errors
         // @ts-ignore
@@ -298,56 +300,62 @@
             status('権限が拒否されています。アドレスバー左のアイコンから許可してください。', true);
         }
       }
-    } catch {}
 
-    /** @type {Array<FontLike>} */
-    let fonts = [];
-    try {
-      if ('queryLocalFonts' in window) {
-        // @ts-ignore
-        fonts = await window.queryLocalFonts();
-      } else if (navigator.fonts && 'query' in navigator.fonts) {
-        // @ts-ignore older API returns async iterator
-        for await (const md of navigator.fonts.query()) {
-          fonts.push(md);
+      /** @type {Array<FontLike>} */
+      let fonts = [];
+      try {
+        if ('queryLocalFonts' in window) {
+          // @ts-ignore
+          fonts = await window.queryLocalFonts();
+        } else if (navigator.fonts && 'query' in navigator.fonts) {
+          // @ts-ignore older API returns async iterator
+          for await (const md of navigator.fonts.query()) {
+            fonts.push(md);
+          }
+        } else {
+          unsupportedMessage();
+          return;
         }
-      } else {
-        unsupportedMessage();
+      } catch (e) {
+          console.error(e);
+          status('権限が許可されなかったか、ポリシーでブロックされています。Chromeの設定を確認してください。', true);
         return;
       }
-    } catch (e) {
-        console.error(e);
-        status('権限が許可されなかったか、ポリシーでブロックされています。Chromeの設定を確認してください。', true);
-      return;
-    }
 
-    // Normalize & sort
-    const enriched = [];
-    for (const f of fonts) {
-      let otName = '', otFamily = '', jaFamily = '';
-      try {
-        const blob = await f.blob();
-        const font = opentype.parse(await blob.arrayBuffer());
-        const enFull = englishName(font?.names?.fullName);
-        const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
-        const jaFam = japaneseName(font?.names?.preferredFamily) || japaneseName(font?.names?.fontFamily);
-        otName = enFull;
-        otFamily = enFam;
-        jaFamily = jaFam;
-      } catch {}
-      enriched.push({
-        family: otFamily || f.family,
-        familyJa: jaFamily || '',
-        fullName: otName || f.fullName || '',
-        postscriptName: f.postscriptName || '',
-        style: f.style || '',
-      });
+      // Normalize & sort
+      const enriched = [];
+      progressStatus(`フォント情報解析中… 0/${fonts.length}`);
+      for (let i = 0; i < fonts.length; i++) {
+        const f = fonts[i];
+        let otName = '', otFamily = '', jaFamily = '';
+        try {
+          const blob = await f.blob();
+          const font = opentype.parse(await blob.arrayBuffer());
+          const enFull = englishName(font?.names?.fullName);
+          const enFam = englishName(font?.names?.preferredFamily) || englishName(font?.names?.fontFamily);
+          const jaFam = japaneseName(font?.names?.preferredFamily) || japaneseName(font?.names?.fontFamily);
+          otName = enFull;
+          otFamily = enFam;
+          jaFamily = jaFam;
+        } catch {}
+        enriched.push({
+          family: otFamily || f.family,
+          familyJa: jaFamily || '',
+          fullName: otName || f.fullName || '',
+          postscriptName: f.postscriptName || '',
+          style: f.style || '',
+        });
+        progressStatus(`フォント情報解析中… ${i + 1}/${fonts.length}`);
+      }
+      state.fonts = enriched
+        .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
+      const familyCount = new Set(state.fonts.map(f => f.family)).size;
+      status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
+      applyFilterAndRender(true);
+    } finally {
+      hideLoading();
+      setUIEnabled(true);
     }
-    state.fonts = enriched
-      .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
-    const familyCount = new Set(state.fonts.map(f => f.family)).size;
-    status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
-    applyFilterAndRender(true);
   }
 
   function unsupportedMessage() {
