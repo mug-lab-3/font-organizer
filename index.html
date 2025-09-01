@@ -61,6 +61,8 @@
   .flash-drop{animation:flashDrop .6s;}
   @keyframes flashKeep{from{background:rgba(46,204,113,.2);}to{background:#0e1120;}}
   @keyframes flashDrop{from{background:rgba(255,107,107,.2);}to{background:#0e1120;}}
+  .load-anim{border-color:var(--primary);animation:loadGlow 1.5s ease-in-out infinite;}
+  @keyframes loadGlow{0%,100%{box-shadow:0 0 4px var(--primary);}50%{box-shadow:0 0 12px 4px var(--primary);}}
   .sr{position:absolute;left:-9999px}
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
     .x-link{margin-left:auto;text-decoration:none;padding:6px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary);background:transparent;color:#fff;}
@@ -192,6 +194,8 @@
   const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
   const loadingEl = $('#loading');
   const loadingTextEl = $('#loadingText');
+
+  loadBtn.classList.add('load-anim');
 
   function setUIEnabled(enabled) {
     document.querySelectorAll('button, input, select').forEach(el => {
@@ -350,6 +354,7 @@
       }
       state.fonts = enriched
         .sort((a,b)=> a.family.localeCompare(b.family,'en') || (a.fullName||'').localeCompare(b.fullName||'','en'));
+      loadBtn.classList.remove('load-anim');
       const familyCount = new Set(state.fonts.map(f => f.family)).size;
       status(`読み込み完了: ${familyCount} フォントファミリを取得しました`);
       applyFilterAndRender(true);
