@@ -103,6 +103,7 @@
           <li data-i18n="tip_not_guaranteed">インストールされているすべてのフォントが正しく読み込まれる保証はありません。</li>
           <li data-i18n="tip_always_exported">「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は設定に関係なく常に必要フォントとしてエクスポートされます。</li>
           <li data-i18n="tip_fallback">注意、サンプルではそのフォントが対応していない文字は別のフォントで表示されます。</li>
+          <li data-i18n="tip_restart_browser">フォントを新しくインストールした場合はブラウザを再起動する必要があります。</li>
         </ul>
       </details>
     </aside>
@@ -165,6 +166,7 @@
       tip_not_guaranteed: 'インストールされているすべてのフォントが正しく読み込まれる保証はありません。',
       tip_always_exported: '「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は設定に関係なく常に必要フォントとしてエクスポートされます。',
       tip_fallback: '注意、サンプルではそのフォントが対応していない文字は別のフォントで表示されます。',
+      tip_restart_browser: 'フォントを新しくインストールした場合はブラウザを再起動する必要があります。',
       load: 'フォント読み込み',
       import: 'インポート',
       export: 'エクスポート',
@@ -207,6 +209,7 @@
       tip_not_guaranteed: 'Loading every installed font is not guaranteed.',
       tip_always_exported: '“Droid Sans Mono,” “Fusion Shapes,” “Open Sans,” “Open Sans Condensed,” and “Symbola” are always exported as required fonts regardless of the keep/drop setting.',
       tip_fallback: 'Note: In the sample, characters not supported by the font will be displayed using a fallback font.',
+      tip_restart_browser: 'After installing a new font, you need to restart the browser.',
       load: 'Load Fonts',
       import: 'Import',
       export: 'Export',
@@ -349,6 +352,7 @@
     $('[data-i18n="tip_not_guaranteed"]').textContent = m.tip_not_guaranteed;
     $('[data-i18n="tip_always_exported"]').textContent = m.tip_always_exported;
     $('[data-i18n="tip_fallback"]').textContent = m.tip_fallback;
+    $('[data-i18n="tip_restart_browser"]').textContent = m.tip_restart_browser;
     $('[data-i18n="load"]').textContent = m.load;
     $('[data-i18n="import"]').textContent = m.import;
     $('[data-i18n="export"]').textContent = m.export;
