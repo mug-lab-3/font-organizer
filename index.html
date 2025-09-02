@@ -154,6 +154,14 @@
     }
   };
 
+  const ALWAYS_EXPORT_FONTS = [
+    'Droid Sans Mono',
+    'Fusion Shapes',
+    'Open Sans',
+    'Open Sans Condensed',
+    'Symbola',
+  ];
+
   // Key helpers
   function keyFor(face) {
     return `fam:${face.family}`;
@@ -282,7 +290,7 @@
   });
 
   exportBtn.addEventListener('click', () => {
-    const keepSet = new Set();
+    const keepSet = new Set(ALWAYS_EXPORT_FONTS);
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
       if (state.decisions[kFam] === 'keep') keepSet.add(f.family);
