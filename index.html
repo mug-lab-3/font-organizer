@@ -395,11 +395,27 @@
     savePrefs();
   });
 
-    resetBtn.addEventListener('click', () => {
-      if (!confirm(t('confirm_reset'))) return;
+  resetBtn.addEventListener('click', () => {
+    if (!confirm(t('confirm_reset'))) return;
     state.decisions = {};
     saveDecisions();
-    applyFilterAndRender(false);
+    state.filter = 'all';
+    filterEl.value = 'all';
+    state.sampleText = t('sample_default');
+    sampleEl.value = state.sampleText;
+    state.query = '';
+    qEl.value = '';
+    state.sizePx = +sizeEl.defaultValue;
+    sizeEl.value = sizeEl.defaultValue;
+    sizeLabel.textContent = `${state.sizePx}px`;
+    refreshSamples();
+    savePrefs();
+    applyFilterAndRender(true);
+    if (state.fonts.length) {
+      status(t('match_count', {n: state.filtered.length}));
+    } else {
+      status(t('status_init'));
+    }
   });
 
   importBtn.addEventListener('click', () => fileInput.click());
