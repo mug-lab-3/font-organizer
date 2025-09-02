@@ -8,7 +8,7 @@
 <style>
   :root {
     --bg:#0b0c10; --panel:#151821; --ink:#e8eaf0; --muted:#a7adbb; --primary:#ac00ac; --accent:#AE75DA;
-    --keep:#2ecc71; --drop:#ff6b6b; --chip:#222735;
+    --keep:#2ecc71; --drop:#ff4d8d; --chip:#222735;
   }
     html,body{min-height:100%;}
   body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;}
@@ -54,13 +54,13 @@
   .empty{padding:24px;text-align:center;color:var(--muted)}
   footer{padding:24px 16px;color:var(--muted);text-align:center}
   .accent{color:var(--accent)}
-  .danger{color:#ff8b8b;display:inline-flex;align-items:center;gap:4px}
+  .danger{color:var(--drop);display:inline-flex;align-items:center;gap:4px}
   .ok{color:#e562ff;display:inline-flex;align-items:center;gap:4px}
   details summary{cursor:pointer;opacity:.9}
   .flash-keep{animation:flashKeep .6s;}
   .flash-drop{animation:flashDrop .6s;}
   @keyframes flashKeep{from{background:rgba(46,204,113,.2);}to{background:#0e1120;}}
-  @keyframes flashDrop{from{background:rgba(255,107,107,.2);}to{background:#0e1120;}}
+  @keyframes flashDrop{from{background:rgba(255,77,141,.2);}to{background:#0e1120;}}
   .load-anim{border-color:var(--primary);animation:loadGlow 1.5s ease-in-out infinite;}
   @keyframes loadGlow{0%,100%{box-shadow:0 0 4px var(--primary);}50%{box-shadow:0 0 12px 4px var(--primary);}}
   .sr{position:absolute;left:-9999px}
