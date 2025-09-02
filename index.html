@@ -512,6 +512,7 @@
         const p = await navigator.permissions.query({name:'local-fonts'});
         if (p && p.state === 'denied') {
             status(t('permission_denied'), true);
+            return;
         }
       }
 
@@ -534,6 +535,18 @@
           console.error(e);
           status(t('permission_blocked'), true);
         return;
+      }
+
+      // Check permission again after attempting to load fonts
+      if (navigator.permissions) {
+        try {
+          // @ts-ignore
+          const p = await navigator.permissions.query({name:'local-fonts'});
+          if (p && p.state === 'denied') {
+            status(t('permission_blocked'), true);
+            return;
+          }
+        } catch {}
       }
 
       // Normalize & sort
