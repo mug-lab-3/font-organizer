@@ -238,10 +238,20 @@
   */
 
   // ---- UI wiring -----------------------------------------------------------
-  qEl.addEventListener('input', () => { state.query = qEl.value.trim().toLowerCase(); applyFilterAndRender(true); savePrefs(); });
+  qEl.addEventListener('input', () => {
+    state.query = qEl.value.trim().toLowerCase();
+    applyFilterAndRender(true);
+    status(`該当件数: ${state.filtered.length}件`);
+    savePrefs();
+  });
   sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); savePrefs(); });
   sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); savePrefs(); });
-  filterEl.addEventListener('change', () => { state.filter = filterEl.value; applyFilterAndRender(true); savePrefs(); });
+  filterEl.addEventListener('change', () => {
+    state.filter = filterEl.value;
+    applyFilterAndRender(true);
+    status(`該当件数: ${state.filtered.length}件`);
+    savePrefs();
+  });
 
     resetBtn.addEventListener('click', () => {
       if (!confirm('仕分け結果をすべてリセットしますか？')) return;
