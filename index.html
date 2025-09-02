@@ -111,8 +111,8 @@
       <div class="bar">
         <div class="toolbar">
             <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">search</span><span data-i18n="load">フォント読み込み</span></button>
-            <button id="import" class="btn"><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span data-i18n="import">インポート</span></button>
-            <button id="export" class="btn"><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="export">エクスポート</span></button>
+            <button id="import" class="btn" disabled><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span data-i18n="import">インポート</span></button>
+            <button id="export" class="btn" disabled><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="export">エクスポート</span></button>
             <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span data-i18n="reset">リセット</span></button>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
@@ -325,7 +325,11 @@
 
   function setUIEnabled(enabled) {
     document.querySelectorAll('button, input, select').forEach(el => {
-      el.disabled = !enabled;
+      if (el === importBtn || el === exportBtn) {
+        el.disabled = !enabled || !state.fonts.length;
+      } else {
+        el.disabled = !enabled;
+      }
     });
   }
   function showLoading(msg = '') {
