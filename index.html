@@ -507,12 +507,15 @@
     try {
       // Try permission hint (optional)
       if (navigator.permissions) {
-        // Not all UAs implement this name, so ignore errors
-        // @ts-ignore
-        const p = await navigator.permissions.query({name:'local-fonts'});
-        if (p && p.state === 'denied') {
+        try {
+          // Not all UAs implement this name, so ignore errors
+          // @ts-ignore
+          const p = await navigator.permissions.query({name:'local-fonts'});
+          if (p && p.state === 'denied') {
             status(t('permission_denied'), true);
-        }
+            return;
+          }
+        } catch {}
       }
 
       /** @type {Array<FontLike>} */
@@ -532,7 +535,13 @@
         }
       } catch (e) {
           console.error(e);
-          status(t('permission_blocked'), true);
+          // Distinguish between permission denied and other failures
+          const n = e && /** @type {any} */ (e).name;
+          if (n === 'NotAllowedError' || n === 'SecurityError') {
+            status(t('permission_denied'), true);
+          } else {
+            status(t('permission_blocked'), true);
+          }
         return;
       }
 
