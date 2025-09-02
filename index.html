@@ -595,12 +595,17 @@
 
     // Text query
     if (state.query) {
-      const q = state.query;
+      const terms = state.query
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
       arr = arr.filter(f =>
-        (f.family && f.family.toLowerCase().includes(q)) ||
-        (f.fullName && f.fullName.toLowerCase().includes(q)) ||
-        (f.postscriptName && f.postscriptName.toLowerCase().includes(q)) ||
-        (f.familyJa && f.familyJa.toLowerCase().includes(q))
+        terms.some(q =>
+          (f.family && f.family.toLowerCase().includes(q)) ||
+          (f.fullName && f.fullName.toLowerCase().includes(q)) ||
+          (f.postscriptName && f.postscriptName.toLowerCase().includes(q)) ||
+          (f.familyJa && f.familyJa.toLowerCase().includes(q))
+        )
       );
     }
 
