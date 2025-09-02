@@ -66,9 +66,10 @@
   @keyframes flashDrop{from{background:rgba(255,77,141,.2);}to{background:#0e1120;}}
   .load-anim{border-color:var(--primary);animation:loadGlow 1.5s ease-in-out infinite;}
   @keyframes loadGlow{0%,100%{box-shadow:0 0 4px var(--primary);}50%{box-shadow:0 0 12px 4px var(--primary);}}
-  .sr{position:absolute;left:-9999px}
-    .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
-    .lang-select{width:auto;margin:0;}
+    .sr{position:absolute;left:-9999px}
+      .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
+      .icon{width:20px;height:20px;display:block}
+      .lang-select{width:auto;margin:0;}
     .x-link{text-decoration:none;padding:6px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary);background:transparent;color:#fff;font-size:1.2rem;}
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
@@ -719,8 +720,14 @@
         </div>
       </div>
       <div class="status">
-        <button class="pill keep" aria-pressed="${d==='keep'}" data-i18n="keep">${t('keep_label')}</button>
-        <button class="pill drop" aria-pressed="${d==='drop'}" data-i18n="drop">${t('drop_label')}</button>
+        <button class="pill keep" aria-pressed="${d==='keep'}">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <span data-i18n="keep">${t('keep_label')}</span>
+        </button>
+        <button class="pill drop" aria-pressed="${d==='drop'}">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <span data-i18n="drop">${t('drop_label')}</span>
+        </button>
       </div>
     `;
     const preview = document.createElement('div');
