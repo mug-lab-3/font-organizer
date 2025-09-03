@@ -1,7 +1,7 @@
 {
   "name": "DaVinci Resolve Font Organizer",
   "short_name": "DVR Font Org",
-  "start_url": "/",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0b0c10",
