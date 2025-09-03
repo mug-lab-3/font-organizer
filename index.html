@@ -846,7 +846,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js', { scope: '/index.html' }).catch(console.error);
+      navigator.serviceWorker.register('/font-organizer/sw.js', { scope: '/font-organizer/index.html' }).catch(console.error);
     });
   }
 </script>
