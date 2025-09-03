@@ -850,7 +850,8 @@
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./assets/sw.js').catch(console.error);
+      const base = window.location.pathname.replace(/[^/]*$/, '');
+      navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(console.error);
     });
   }
 </script>
