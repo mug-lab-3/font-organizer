@@ -1,8 +1,8 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.0';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.1';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const PRECACHE_URLS  = [
-  '/',                             // HTML 1ファイル前提
+  '/index.html',
   '/manifest.webmanifest',
   '/assets/favicon_32.png',
   '/assets/favicon_64.png',
