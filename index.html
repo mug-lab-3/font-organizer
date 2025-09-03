@@ -159,13 +159,6 @@
     <span id="loadingText" data-i18n="loading">読み込み中…</span>
   </div>
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(console.error);
-    });
-  }
-</script>
-<script>
 /* global opentype */
 (() => {
   'use strict';
@@ -849,6 +842,13 @@
     }
   })();
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/index.html' }).catch(console.error);
+    });
+  }
 </script>
 </body>
 </html>
