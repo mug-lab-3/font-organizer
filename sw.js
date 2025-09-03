@@ -1,14 +1,15 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.6';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.7';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
+const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
-  '../index.html',
-  '../manifest.webmanifest',
-  './favicon_32.png',
-  './favicon_64.png',
-  './favicon_128.png',
-  './favicon_256.png',
-  './favicon_512.png'
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/manifest.webmanifest`,
+  `${BASE_PATH}/assets/favicon_32.png`,
+  `${BASE_PATH}/assets/favicon_64.png`,
+  `${BASE_PATH}/assets/favicon_128.png`,
+  `${BASE_PATH}/assets/favicon_256.png`,
+  `${BASE_PATH}/assets/favicon_512.png`
 ];
 // ===============================================================
 
@@ -45,9 +46,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
-        caches.open(PRECACHE_NAME).then(c => c.put('../index.html', copy));
+        caches.open(PRECACHE_NAME).then(c => c.put(`${BASE_PATH}/index.html`, copy));
         return res;
-      }).catch(() => caches.match('../index.html') /* オフライン時フォールバック */)
+      }).catch(() => caches.match(`${BASE_PATH}/index.html`) /* オフライン時フォールバック */)
     );
     return;
   }
