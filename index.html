@@ -121,6 +121,7 @@
             <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">font_download</span><span data-i18n="load">フォント読み込み</span></button>
             <button id="import" class="btn" disabled><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span data-i18n="import">インポート</span></button>
             <button id="export" class="btn" disabled><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="export">エクスポート</span></button>
+            <label class="btn"><input type="checkbox" id="fixedExport" checked /><span data-i18n="fixed_export">固定フォント</span></label>
             <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span data-i18n="reset">リセット</span></button>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
@@ -170,12 +171,13 @@
       tips_title: 'ヒント',
       tip_permission: 'フォントが読み込めない場合、ブラウザにローカルフォントへのアクセス権限が付与されていない可能性があります。アドレスバー左のアイコンから権限を設定してください。',
       tip_not_guaranteed: 'インストールされているすべてのフォントが正しく読み込まれる保証はありません。',
-      tip_always_exported: '「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は「不要」に設定されていなければ必要フォントとしてエクスポートされます。',
+      tip_always_exported: '「固定フォント」を含めるがオンのとき「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は「不要」に設定されていなければ必要フォントとしてエクスポートされます。',
       tip_fallback: '注意、サンプルではそのフォントが対応していない文字は別のフォントで表示されます。',
       tip_restart_browser: 'フォントを新しくインストールした場合はブラウザを再起動する必要があります。',
       load: 'フォント読み込み',
       import: 'インポート',
       export: 'エクスポート',
+      fixed_export: '固定フォント',
       reset: 'リセット',
       size: 'サイズ',
       sample: 'プレビュー文字',
@@ -213,12 +215,13 @@
       tips_title: 'Tips',
       tip_permission: 'If fonts fail to load, the browser may not have permission to access local fonts. Use the icon to the left of the address bar to grant access.',
       tip_not_guaranteed: 'Loading every installed font is not guaranteed.',
-      tip_always_exported: '“Droid Sans Mono,” “Fusion Shapes,” “Open Sans,” “Open Sans Condensed,” and “Symbola” are exported as required fonts unless marked as drop.',
+      tip_always_exported: '“Droid Sans Mono,” “Fusion Shapes,” “Open Sans,” “Open Sans Condensed,” and “Symbola” are exported as required fonts when "Include default fonts" is checked and they are not marked as drop.',
       tip_fallback: 'Note: In the sample, characters not supported by the font will be displayed using a fallback font.',
       tip_restart_browser: 'After installing a new font, you need to restart the browser.',
       load: 'Load Fonts',
       import: 'Import',
       export: 'Export',
+      fixed_export: 'Include default fonts',
       reset: 'Reset',
       size: 'Size',
       sample: 'Sample Text',
@@ -270,6 +273,7 @@
     filter: 'all',
     query: '',
     lang: 'ja',
+    includeDefaults: true,
     supported: {
       queryLocalFonts: 'queryLocalFonts' in window,
       navFontsQuery: !!(navigator.fonts && 'query' in navigator.fonts)
@@ -302,7 +306,8 @@
       sizePx: state.sizePx,
       filter: state.filter,
       query: qEl.value,
-      lang: state.lang
+      lang: state.lang,
+      includeDefaults: state.includeDefaults
     };
     localStorage.setItem('font-organizer:prefs', JSON.stringify(prefs));
   }
@@ -323,6 +328,7 @@
   const filterEl = /** @type {HTMLSelectElement} */($('#filter'));
   const loadBtn = /** @type {HTMLButtonElement} */($('#load'));
   const exportBtn = /** @type {HTMLButtonElement} */($('#export'));
+  const fixedExportEl = /** @type {HTMLInputElement} */($('#fixedExport'));
   const importBtn = /** @type {HTMLButtonElement} */($('#import'));
   const fileInput = /** @type {HTMLInputElement} */($('#file'));
   const resetBtn = /** @type {HTMLButtonElement} */($('#reset'));
@@ -362,6 +368,7 @@
     $('[data-i18n="load"]').textContent = m.load;
     $('[data-i18n="import"]').textContent = m.import;
     $('[data-i18n="export"]').textContent = m.export;
+    $('[data-i18n="fixed_export"]').textContent = m.fixed_export;
     $('[data-i18n="reset"]').textContent = m.reset;
     $('[data-i18n="size"]').textContent = m.size;
     $('[data-i18n="sample"]').textContent = m.sample;
@@ -411,6 +418,10 @@
     qEl.value = prefs.query;
     state.query = prefs.query.trim().toLowerCase();
   }
+  if (typeof prefs.includeDefaults === 'boolean') {
+    state.includeDefaults = prefs.includeDefaults;
+  }
+  fixedExportEl.checked = state.includeDefaults;
 
   // ---- Types (JSDoc) -------------------------------------------------------
   /**
@@ -436,6 +447,10 @@
     state.lang = langEl.value;
     applyLocale();
     applyFilterAndRender(false);
+    savePrefs();
+  });
+  fixedExportEl.addEventListener('change', () => {
+    state.includeDefaults = fixedExportEl.checked;
     savePrefs();
   });
 
@@ -485,15 +500,20 @@
 
   exportBtn.addEventListener('click', () => {
     const keepSet = new Set();
-    for (const fam of DEFAULT_EXPORT_FONTS) {
-      const k = `fam:${fam}`;
-      if (state.decisions[k] !== 'drop') keepSet.add(fam);
-    }
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
       if (state.decisions[kFam] === 'keep') keepSet.add(f.family);
     }
-    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'en'));
+    const defaultFonts = [];
+    if (state.includeDefaults) {
+      // Collect fixed fonts that are not marked as drop and append them later
+      for (const fam of DEFAULT_EXPORT_FONTS) {
+        const k = `fam:${fam}`;
+        if (state.decisions[k] !== 'drop') defaultFonts.push(fam);
+      }
+      for (const fam of defaultFonts) keepSet.delete(fam);
+    }
+    const lines = Array.from(keepSet).sort((a,b)=>a.localeCompare(b,'en')).concat(defaultFonts);
     const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a');
     a.download = 'davinci_resolve_fonts.txt';
