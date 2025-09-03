@@ -1,14 +1,14 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.1';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.2';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const PRECACHE_URLS  = [
-  '/index.html',
-  '/manifest.webmanifest',
-  '/assets/favicon_32.png',
-  '/assets/favicon_64.png',
-  '/assets/favicon_128.png',
-  '/assets/favicon_256.png',
-  '/assets/favicon_512.png'
+  '../index.html',
+  '../manifest.webmanifest',
+  './favicon_32.png',
+  './favicon_64.png',
+  './favicon_128.png',
+  './favicon_256.png',
+  './favicon_512.png'
 ];
 // ===============================================================
 
