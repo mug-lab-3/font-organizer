@@ -1,14 +1,14 @@
 {
   "name": "DaVinci Resolve Font Organizer",
   "short_name": "DVR Font Org",
-  "start_url": "/font-organizer/index.html",
-  "scope": "/font-organizer/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b0c10",
   "theme_color": "#ac00ac",
   "icons": [
-    { "src": "/font-organizer/assets/favicon_128.png", "sizes": "128x128", "type": "image/png" },
-    { "src": "/font-organizer/assets/favicon_256.png", "sizes": "256x256", "type": "image/png" },
-    { "src": "/font-organizer/assets/favicon_512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "./assets/favicon_128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "./assets/favicon_256.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "./assets/favicon_512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
