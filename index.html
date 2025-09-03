@@ -107,7 +107,7 @@
         <ul>
           <li data-i18n="tip_permission">フォントが読み込めない場合、ブラウザにローカルフォントへのアクセス権限が付与されていない可能性があります。アドレスバー左のアイコンから権限を設定してください。</li>
           <li data-i18n="tip_not_guaranteed">インストールされているすべてのフォントが正しく読み込まれる保証はありません。</li>
-          <li data-i18n="tip_always_exported">「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は設定に関係なく常に必要フォントとしてエクスポートされます。</li>
+          <li data-i18n="tip_always_exported">「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は「不要」に設定されていなければ必要フォントとしてエクスポートされます。</li>
           <li data-i18n="tip_fallback">注意、サンプルではそのフォントが対応していない文字は別のフォントで表示されます。</li>
           <li data-i18n="tip_restart_browser">フォントを新しくインストールした場合はブラウザを再起動する必要があります。</li>
         </ul>
@@ -169,7 +169,7 @@
       tips_title: 'ヒント',
       tip_permission: 'フォントが読み込めない場合、ブラウザにローカルフォントへのアクセス権限が付与されていない可能性があります。アドレスバー左のアイコンから権限を設定してください。',
       tip_not_guaranteed: 'インストールされているすべてのフォントが正しく読み込まれる保証はありません。',
-      tip_always_exported: '「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は設定に関係なく常に必要フォントとしてエクスポートされます。',
+      tip_always_exported: '「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は「不要」に設定されていなければ必要フォントとしてエクスポートされます。',
       tip_fallback: '注意、サンプルではそのフォントが対応していない文字は別のフォントで表示されます。',
       tip_restart_browser: 'フォントを新しくインストールした場合はブラウザを再起動する必要があります。',
       load: 'フォント読み込み',
@@ -212,7 +212,7 @@
       tips_title: 'Tips',
       tip_permission: 'If fonts fail to load, the browser may not have permission to access local fonts. Use the icon to the left of the address bar to grant access.',
       tip_not_guaranteed: 'Loading every installed font is not guaranteed.',
-      tip_always_exported: '“Droid Sans Mono,” “Fusion Shapes,” “Open Sans,” “Open Sans Condensed,” and “Symbola” are always exported as required fonts regardless of the keep/drop setting.',
+      tip_always_exported: '“Droid Sans Mono,” “Fusion Shapes,” “Open Sans,” “Open Sans Condensed,” and “Symbola” are exported as required fonts unless marked as drop.',
       tip_fallback: 'Note: In the sample, characters not supported by the font will be displayed using a fallback font.',
       tip_restart_browser: 'After installing a new font, you need to restart the browser.',
       load: 'Load Fonts',
@@ -275,7 +275,7 @@
     }
   };
 
-  const ALWAYS_EXPORT_FONTS = [
+  const DEFAULT_EXPORT_FONTS = [
     'Droid Sans Mono',
     'Fusion Shapes',
     'Open Sans',
@@ -483,7 +483,11 @@
   });
 
   exportBtn.addEventListener('click', () => {
-    const keepSet = new Set(ALWAYS_EXPORT_FONTS);
+    const keepSet = new Set();
+    for (const fam of DEFAULT_EXPORT_FONTS) {
+      const k = `fam:${fam}`;
+      if (state.decisions[k] !== 'drop') keepSet.add(fam);
+    }
     for (const f of state.fonts) {
       const kFam = `fam:${f.family}`;
       if (state.decisions[kFam] === 'keep') keepSet.add(f.family);
