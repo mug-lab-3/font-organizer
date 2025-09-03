@@ -45,9 +45,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
-        caches.open(PRECACHE_NAME).then(c => c.put('./', copy));
+        caches.open(PRECACHE_NAME).then(c => c.put('../index.html', copy));
         return res;
-      }).catch(() => caches.match('./') /* オフライン時フォールバック */)
+      }).catch(() => caches.match('../index.html') /* オフライン時フォールバック */)
     );
     return;
   }
