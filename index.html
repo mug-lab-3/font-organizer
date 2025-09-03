@@ -121,7 +121,7 @@
             <button id="load" class="btn"><span class="material-symbols-outlined" aria-hidden="true">font_download</span><span data-i18n="load">フォント読み込み</span></button>
             <button id="import" class="btn" disabled><span class="material-symbols-outlined" aria-hidden="true">file_upload</span><span data-i18n="import">インポート</span></button>
             <button id="export" class="btn" disabled><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="export">エクスポート</span></button>
-            <label class="btn"><input type="checkbox" id="fixedExport" checked /><span data-i18n="fixed_export">固定フォント</span></label>
+            <label class="btn"><input type="checkbox" id="fixedExport" checked /><span data-i18n="fixed_export">デフォルトフォントを含める</span></label>
             <button id="reset" class="btn"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span data-i18n="reset">リセット</span></button>
           <input id="file" type="file" accept=".txt" class="sr" />
         </div>
@@ -171,13 +171,13 @@
       tips_title: 'ヒント',
       tip_permission: 'フォントが読み込めない場合、ブラウザにローカルフォントへのアクセス権限が付与されていない可能性があります。アドレスバー左のアイコンから権限を設定してください。',
       tip_not_guaranteed: 'インストールされているすべてのフォントが正しく読み込まれる保証はありません。',
-      tip_always_exported: '「固定フォント」を含めるがオンのとき「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は「不要」に設定されていなければ必要フォントとしてエクスポートされます。',
+      tip_always_exported: '「デフォルトフォントを含める」がオンのとき「Droid Sans Mono」「Fusion Shapes」「Open Sans」「Open Sans Condensed」「Symbola」は「不要」に設定されていなければ必要フォントとしてエクスポートされます。',
       tip_fallback: '注意、サンプルではそのフォントが対応していない文字は別のフォントで表示されます。',
       tip_restart_browser: 'フォントを新しくインストールした場合はブラウザを再起動する必要があります。',
       load: 'フォント読み込み',
       import: 'インポート',
       export: 'エクスポート',
-      fixed_export: '固定フォント',
+      fixed_export: 'デフォルトフォントを含める',
       reset: 'リセット',
       size: 'サイズ',
       sample: 'プレビュー文字',
