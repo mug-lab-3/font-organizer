@@ -1,5 +1,5 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.4';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.5';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const PRECACHE_URLS  = [
   '../index.html',
@@ -45,9 +45,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
-        caches.open(PRECACHE_NAME).then(c => c.put('/', copy));
+        caches.open(PRECACHE_NAME).then(c => c.put('./', copy));
         return res;
-      }).catch(() => caches.match('/') /* オフライン時フォールバック */)
+      }).catch(() => caches.match('./') /* オフライン時フォールバック */)
     );
     return;
   }
