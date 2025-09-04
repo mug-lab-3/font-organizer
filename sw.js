@@ -1,5 +1,5 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.12';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.13';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
@@ -13,9 +13,13 @@ const PRECACHE_URLS  = [
 ];
 // ===============================================================
 
-// install: 事前キャッシュ（skipWaitingは呼ばない＝次回リロードで反映）
+// install: pre-cache assets and activate new worker immediately
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(PRECACHE_NAME).then(c => c.addAll(PRECACHE_URLS)));
+  event.waitUntil(
+    caches.open(PRECACHE_NAME)
+      .then(c => c.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting())
+  );
 });
 
 // activate: 古いプレキャッシュは全削除（無限増殖を防止）
@@ -27,7 +31,7 @@ self.addEventListener('activate', (event) => {
         .filter(n => n.startsWith('precache-') && n !== PRECACHE_NAME)
         .map(n => caches.delete(n))
     );
-    // 今開いてるタブは旧SWのまま。リロードで新SWに切替したいので clients.claim() もしない
+    await self.clients.claim();
   })());
 });
 
