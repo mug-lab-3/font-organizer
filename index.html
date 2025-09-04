@@ -676,6 +676,7 @@
       visiblePreviews.clear();
       if (previewObserver) previewObserver.disconnect();
     }
+    document.getElementById('sentinel')?.remove();
     if (!state.filtered.length) {
         endEl.textContent = t('no_items');
       return;
@@ -715,6 +716,7 @@
       }
     }, {rootMargin: '800px 0px'});
     const sentinel = document.createElement('div');
+    sentinel.id = 'sentinel';
     sentinel.style.height = '1px';
     listEl.appendChild(sentinel);
     io.observe(sentinel);
