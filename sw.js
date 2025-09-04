@@ -1,5 +1,5 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.15';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.16';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
