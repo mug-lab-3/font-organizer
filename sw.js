@@ -1,5 +1,5 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.13';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.14';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
@@ -8,6 +8,7 @@ const PRECACHE_URLS  = [
   `${BASE_PATH}/assets/favicon_32.png`,
   `${BASE_PATH}/assets/favicon_64.png`,
   `${BASE_PATH}/assets/favicon_128.png`,
+  `${BASE_PATH}/assets/favicon_192.png`,
   `${BASE_PATH}/assets/favicon_256.png`,
   `${BASE_PATH}/assets/favicon_512.png`
 ];
