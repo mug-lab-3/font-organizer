@@ -1,6 +1,7 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.20';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.21';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
+const FONT_CACHE_NAME = `fontcache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
   `${BASE_PATH}/index.html`,
@@ -30,7 +31,10 @@ self.addEventListener('activate', (event) => {
     const names = await caches.keys();
     await Promise.all(
       names
-        .filter(n => n.startsWith('precache-') && n !== PRECACHE_NAME)
+        .filter(n => (
+          (n.startsWith('precache-') && n !== PRECACHE_NAME) ||
+          (n.startsWith('fontcache-') && n !== FONT_CACHE_NAME)
+        ))
         .map(n => caches.delete(n))
     );
     await self.clients.claim();
@@ -52,6 +56,22 @@ self.addEventListener('fetch', (event) => {
         caches.open(PRECACHE_NAME).then(c => c.put(`${BASE_PATH}/index.html`, copy));
         return res;
       }).catch(() => caches.match(`${BASE_PATH}/index.html`) /* オフライン時フォールバック */)
+    );
+    return;
+  }
+
+  // Google Fonts をキャッシュ
+  if (url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com') {
+    event.respondWith(
+      caches.open(FONT_CACHE_NAME).then(cache =>
+        cache.match(req).then(cached => {
+          const fetchPromise = fetch(req).then(res => {
+            cache.put(req, res.clone());
+            return res;
+          });
+          return cached || fetchPromise;
+        })
+      )
     );
     return;
   }
