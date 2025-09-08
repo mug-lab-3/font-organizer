@@ -1,5 +1,5 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.18';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.19';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
@@ -43,9 +43,6 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
-
-  // 同一オリジンのみ対象（外部は完全スルー）
-  if (url.origin !== self.location.origin) return;
 
   // HTML
   if (req.mode === 'navigate') {
