@@ -1,5 +1,5 @@
 // ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.21';                // ← 例: v1.0.1 に上げる
+const CACHE_VERSION  = 'v1.0.22';                // ← 例: v1.0.1 に上げる
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const FONT_CACHE_NAME = `fontcache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
@@ -12,7 +12,8 @@ const PRECACHE_URLS  = [
   `${BASE_PATH}/assets/favicon_192.png`,
   `${BASE_PATH}/assets/favicon_256.png`,
   `${BASE_PATH}/assets/favicon_512.png`,
-  'https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js'
+  'https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js',
+  'https://unavatar.io/github/mug-lab-3'
 ];
 // ===============================================================
 
@@ -77,7 +78,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // プレキャッシュ対象だけキャッシュ優先
-  if (PRECACHE_URLS.includes(url.pathname)) {
+  if (PRECACHE_URLS.includes(req.url) || PRECACHE_URLS.includes(url.pathname)) {
     event.respondWith(
       caches.match(req).then(cached => cached || fetch(req))
     );
