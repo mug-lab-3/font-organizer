@@ -431,11 +431,15 @@
   */
 
   // ---- UI wiring -----------------------------------------------------------
+  let queryTimer;
   qEl.addEventListener('input', () => {
-    state.query = qEl.value.trim().toLowerCase();
-    applyFilterAndRender(true);
-    status(t('match_count', {n: state.filtered.length}));
-    savePrefs();
+    clearTimeout(queryTimer);
+    queryTimer = setTimeout(() => {
+      state.query = qEl.value.trim().toLowerCase();
+      applyFilterAndRender(true);
+      status(t('match_count', {n: state.filtered.length}));
+      savePrefs();
+    }, 300);
   });
   sampleEl.addEventListener('input', () => { state.sampleText = sampleEl.value; refreshSamples(); savePrefs(); });
   sizeEl.addEventListener('input', () => { state.sizePx = +sizeEl.value; sizeLabel.textContent = `${state.sizePx}px`; refreshSamples(); savePrefs(); });
