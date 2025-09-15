@@ -75,8 +75,8 @@
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
   .header-actions{display:flex;align-items:center;gap:8px;}
-  #cache-version{position:fixed;top:8px;right:8px;font-size:12px;color:var(--muted);opacity:.8;z-index:1000;}
-  @media(max-width:600px){#cache-version{display:none;}}
+  #cache-version{position:fixed;top:8px;right:12px;font-size:12px;color:var(--muted);opacity:.8;z-index:1000;pointer-events:none;white-space:nowrap;}
+  #cache-version.overlap-hidden{display:none;}
   .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:1000;font-size:18px;}
   .loading[hidden]{display:none;}
   .loading .spinner{width:48px;height:48px;border:4px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;}
@@ -92,8 +92,8 @@
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
 <body>
-  <span id="cache-version" hidden></span>
   <header>
+    <span id="cache-version" hidden></span>
     <div class="wrap">
       <select id="lang" class="lang-select">
         <option value="ja">日本語</option>
@@ -891,16 +891,55 @@
     }
   </script>
  <script>
-   fetch('./sw.js', {cache: 'no-store'})
-     .then(r => r.text())
-     .then(txt => {
-       const m = txt.match(/CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
-       if (m) {
-         const el = document.getElementById('cache-version');
-         if (el) { el.textContent = m[1]; el.hidden = false; }
-       }
-     })
-     .catch(() => {});
+   (() => {
+     const badge = document.getElementById('cache-version');
+     if (!badge) { return; }
+
+     const updateVisibility = (() => {
+       let rafId = 0;
+       return () => {
+         if (badge.hidden) { return; }
+         badge.classList.remove('overlap-hidden');
+         if (rafId) { cancelAnimationFrame(rafId); }
+         const xLink = document.querySelector('.x-link');
+         rafId = requestAnimationFrame(() => {
+           rafId = 0;
+           const badgeRect = badge.getBoundingClientRect();
+           const linkRect = xLink ? xLink.getBoundingClientRect() : null;
+           const overlaps = linkRect ? !(
+             badgeRect.right <= linkRect.left ||
+             badgeRect.left >= linkRect.right ||
+             badgeRect.bottom <= linkRect.top ||
+             badgeRect.top >= linkRect.bottom
+           ) : false;
+           const clipped = badgeRect.left < 0 || badgeRect.right > window.innerWidth;
+           if (overlaps || clipped) {
+             badge.classList.add('overlap-hidden');
+           } else {
+             badge.classList.remove('overlap-hidden');
+           }
+         });
+       };
+     })();
+
+     const revealBadge = (text) => {
+       badge.textContent = text;
+       badge.hidden = false;
+       updateVisibility();
+       window.addEventListener('resize', updateVisibility, { passive: true });
+       window.addEventListener('orientationchange', updateVisibility);
+     };
+
+     fetch('./sw.js', { cache: 'no-store' })
+       .then((res) => (res.ok ? res.text() : Promise.reject()))
+       .then((txt) => {
+         const match = txt.match(/CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
+         if (match) {
+           revealBadge(match[1]);
+         }
+       })
+       .catch(() => {});
+   })();
  </script>
   </body>
   </html>
