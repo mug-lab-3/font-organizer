@@ -890,22 +890,18 @@
       });
     }
   </script>
- <script>
-   (() => {
-     const badge = document.getElementById('cache-version');
-     if (!badge) { return; }
+  <script src="./cache-version.js"></script>
+  <script>
+    (() => {
+      const badge = document.getElementById('cache-version');
+      const version = self.__CACHE_VERSION__;
+      if (!badge || typeof version !== 'string') {
+        return;
+      }
 
-     fetch('./sw.js', { cache: 'no-store' })
-       .then((res) => (res.ok ? res.text() : Promise.reject()))
-       .then((txt) => {
-         const match = txt.match(/CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
-         if (match) {
-           badge.textContent = match[1];
-           badge.dataset.ready = 'true';
-         }
-       })
-       .catch(() => {});
-   })();
- </script>
+      badge.textContent = version;
+      badge.dataset.ready = '';
+    })();
+  </script>
   </body>
   </html>

@@ -1,11 +1,14 @@
-// ===== 設定（リリースごとに CACHE_VERSION を上げるだけ！）=====
-const CACHE_VERSION  = 'v1.0.25';                // ← 例: v1.0.1 に上げる
+importScripts('./cache-version.js');
+
+// ===== 設定（リリースごとに cache-version.js の値を上げるだけ！）=====
+const CACHE_VERSION  = self.__CACHE_VERSION__;
 const PRECACHE_NAME  = `precache-${CACHE_VERSION}`;
 const FONT_CACHE_NAME = `fontcache-${CACHE_VERSION}`;
 const BASE_PATH = new URL('./', self.location).pathname.replace(/\/$/, '');
 const PRECACHE_URLS  = [
   `${BASE_PATH}/index.html`,
   `${BASE_PATH}/manifest.webmanifest`,
+  `${BASE_PATH}/cache-version.js`,
   `${BASE_PATH}/assets/favicon_32.png`,
   `${BASE_PATH}/assets/favicon_64.png`,
   `${BASE_PATH}/assets/favicon_128.png`,
