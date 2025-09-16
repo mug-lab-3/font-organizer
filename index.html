@@ -894,19 +894,51 @@
      const badge = document.getElementById('cache-version');
      if (!badge) { return; }
 
-     const BADGE_BREAKPOINT = 720; // main content reflows around 700px; keep extra room for the X link
+     const xLink = document.querySelector('.x-link');
+     const MIN_GAP = 12; // px between the badge and the X link when both are visible
+     const EDGE_PADDING = 12; // match the CSS right offset to avoid cramped layouts
 
      const applyVisibility = () => {
        if (!badge.dataset.ready) { return; }
-       badge.hidden = window.innerWidth < BADGE_BREAKPOINT;
+
+       const previousVisibility = badge.style.visibility;
+       badge.style.visibility = 'hidden';
+       badge.hidden = false;
+
+       const badgeRect = badge.getBoundingClientRect();
+       const linkRect = xLink ? xLink.getBoundingClientRect() : null;
+
+       let shouldShow = window.innerWidth >= badgeRect.width + EDGE_PADDING * 2;
+
+       if (linkRect) {
+         shouldShow = shouldShow && (linkRect.right + MIN_GAP) <= badgeRect.left;
+       }
+
+       badge.style.visibility = previousVisibility;
+       badge.hidden = !shouldShow;
+     };
+
+     let scheduled = false;
+     const scheduleVisibility = () => {
+       if (scheduled) { return; }
+       scheduled = true;
+       requestAnimationFrame(() => {
+         scheduled = false;
+         applyVisibility();
+       });
      };
 
      const revealBadge = (text) => {
        badge.textContent = text;
        badge.dataset.ready = 'true';
-       applyVisibility();
-       window.addEventListener('resize', applyVisibility, { passive: true });
-       window.addEventListener('orientationchange', applyVisibility);
+       scheduleVisibility();
+       window.addEventListener('resize', scheduleVisibility, { passive: true });
+       window.addEventListener('orientationchange', scheduleVisibility);
+       window.addEventListener('load', scheduleVisibility);
+       if ('ResizeObserver' in window && xLink) {
+         const resizeObserver = new ResizeObserver(scheduleVisibility);
+         resizeObserver.observe(xLink);
+       }
      };
 
      fetch('./sw.js', { cache: 'no-store' })
