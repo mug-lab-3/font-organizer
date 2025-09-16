@@ -74,6 +74,10 @@
     .x-link{text-decoration:none;padding:6px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary);background:transparent;color:#fff;font-size:1.2rem;}
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
+  .header-actions{display:grid;grid-template-columns:max-content;justify-items:end;gap:6px;margin-left:auto;}
+  .header-actions > *{justify-self:end;}
+  #version{font-size:12px;color:var(--muted);opacity:.8;white-space:nowrap;display:none;}
+  #version[data-ready]{display:block;}
   .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:1000;font-size:18px;}
   .loading[hidden]{display:none;}
   .loading .spinner{width:48px;height:48px;border:4px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;}
@@ -89,18 +93,21 @@
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
 <body>
-    <header>
-      <div class="wrap">
-        <select id="lang" class="lang-select">
-          <option value="ja">日本語</option>
-          <option value="en">English</option>
-        </select>
-        <div class="title-block">
-          <h1>DaVinci Resolve Font Organizer</h1>
-          <div class="hint" data-i18n="hint">DaVinci Resolveで表示されるフォントのフィルターテキストを作成するアプリです。</div>
-        </div>
-    <a class="x-link" href="https://x.com/MugLab3" target="_blank" rel="noopener noreferrer"><img src="https://unavatar.io/github/mug-lab-3" alt="MugLab3 icon" />Mug on X</a>
-  </div>
+  <header>
+    <div class="wrap">
+      <select id="lang" class="lang-select">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+      </select>
+      <div class="title-block">
+        <h1>DaVinci Resolve Font Organizer</h1>
+        <div class="hint" data-i18n="hint">DaVinci Resolveで表示されるフォントのフィルターテキストを作成するアプリです。</div>
+      </div>
+      <div class="header-actions">
+        <a class="x-link" href="https://x.com/MugLab3" target="_blank" rel="noopener noreferrer"><img src="https://unavatar.io/github/mug-lab-3" alt="MugLab3 icon" />Mug on X</a>
+        <span id="version"></span>
+      </div>
+    </div>
   </header>
 
   <main class="wrap">
@@ -877,12 +884,25 @@
 })();
 </script>
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      const base = window.location.pathname.replace(/[^/]*$/, '');
-      navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(console.error);
-    });
-  }
-</script>
-</body>
-</html>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const base = window.location.pathname.replace(/[^/]*$/, '');
+        navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(console.error);
+      });
+    }
+  </script>
+  <script src="./version.js"></script>
+  <script>
+    (() => {
+      const badge = document.getElementById('version');
+      const version = self.version;
+      if (!badge || typeof version !== 'string') {
+        return;
+      }
+
+      badge.textContent = version;
+      badge.dataset.ready = '';
+    })();
+  </script>
+  </body>
+  </html>
