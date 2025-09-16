@@ -508,6 +508,7 @@
     alert(t('alert_loaded', {n: matchedFamilies.size}));
     // Imported decisions may alter earlier pages; reset to start
     applyFilterAndRender(true);
+    status(t('match_count', {n: state.filtered.length}));
     fileInput.value = '';
   });
 
