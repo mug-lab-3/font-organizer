@@ -75,7 +75,8 @@
   .x-link:hover{opacity:.8}
   .x-link img{width:24px;height:24px;border-radius:50%;}
   .header-actions{display:flex;align-items:center;gap:8px;}
-  #cache-version{position:fixed;top:8px;right:12px;font-size:12px;color:var(--muted);opacity:.8;z-index:1000;pointer-events:none;white-space:nowrap;}
+  #cache-version{position:fixed;top:8px;right:12px;font-size:12px;color:var(--muted);opacity:.8;z-index:1000;pointer-events:none;white-space:nowrap;display:none;}
+  @media (min-width:720px){#cache-version[data-ready]{display:inline;}}
   .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:1000;font-size:18px;}
   .loading[hidden]{display:none;}
   .loading .spinner{width:48px;height:48px;border:4px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;}
@@ -92,7 +93,7 @@
 </head>
 <body>
   <header>
-    <span id="cache-version" hidden></span>
+    <span id="cache-version"></span>
     <div class="wrap">
       <select id="lang" class="lang-select">
         <option value="ja">日本語</option>
@@ -894,59 +895,13 @@
      const badge = document.getElementById('cache-version');
      if (!badge) { return; }
 
-     const xLink = document.querySelector('.x-link');
-     const MIN_GAP = 12; // px between the badge and the X link when both are visible
-     const EDGE_PADDING = 12; // match the CSS right offset to avoid cramped layouts
-
-     const applyVisibility = () => {
-       if (!badge.dataset.ready) { return; }
-
-       const previousVisibility = badge.style.visibility;
-       badge.style.visibility = 'hidden';
-       badge.hidden = false;
-
-       const badgeRect = badge.getBoundingClientRect();
-       const linkRect = xLink ? xLink.getBoundingClientRect() : null;
-
-       let shouldShow = window.innerWidth >= badgeRect.width + EDGE_PADDING * 2;
-
-       if (linkRect) {
-         shouldShow = shouldShow && (linkRect.right + MIN_GAP) <= badgeRect.left;
-       }
-
-       badge.style.visibility = previousVisibility;
-       badge.hidden = !shouldShow;
-     };
-
-     let scheduled = false;
-     const scheduleVisibility = () => {
-       if (scheduled) { return; }
-       scheduled = true;
-       requestAnimationFrame(() => {
-         scheduled = false;
-         applyVisibility();
-       });
-     };
-
-     const revealBadge = (text) => {
-       badge.textContent = text;
-       badge.dataset.ready = 'true';
-       scheduleVisibility();
-       window.addEventListener('resize', scheduleVisibility, { passive: true });
-       window.addEventListener('orientationchange', scheduleVisibility);
-       window.addEventListener('load', scheduleVisibility);
-       if ('ResizeObserver' in window && xLink) {
-         const resizeObserver = new ResizeObserver(scheduleVisibility);
-         resizeObserver.observe(xLink);
-       }
-     };
-
      fetch('./sw.js', { cache: 'no-store' })
        .then((res) => (res.ok ? res.text() : Promise.reject()))
        .then((txt) => {
          const match = txt.match(/CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
          if (match) {
-           revealBadge(match[1]);
+           badge.textContent = match[1];
+           badge.dataset.ready = 'true';
          }
        })
        .catch(() => {});
