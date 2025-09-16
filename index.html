@@ -76,7 +76,6 @@
   .x-link img{width:24px;height:24px;border-radius:50%;}
   .header-actions{display:flex;align-items:center;gap:8px;}
   #cache-version{position:fixed;top:8px;right:12px;font-size:12px;color:var(--muted);opacity:.8;z-index:1000;pointer-events:none;white-space:nowrap;}
-  #cache-version.overlap-hidden{display:none;}
   .loading{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:1000;font-size:18px;}
   .loading[hidden]{display:none;}
   .loading .spinner{width:48px;height:48px;border:4px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;}
@@ -895,39 +894,19 @@
      const badge = document.getElementById('cache-version');
      if (!badge) { return; }
 
-     const updateVisibility = (() => {
-       let rafId = 0;
-       return () => {
-         if (badge.hidden) { return; }
-         badge.classList.remove('overlap-hidden');
-         if (rafId) { cancelAnimationFrame(rafId); }
-         const xLink = document.querySelector('.x-link');
-         rafId = requestAnimationFrame(() => {
-           rafId = 0;
-           const badgeRect = badge.getBoundingClientRect();
-           const linkRect = xLink ? xLink.getBoundingClientRect() : null;
-           const overlaps = linkRect ? !(
-             badgeRect.right <= linkRect.left ||
-             badgeRect.left >= linkRect.right ||
-             badgeRect.bottom <= linkRect.top ||
-             badgeRect.top >= linkRect.bottom
-           ) : false;
-           const clipped = badgeRect.left < 0 || badgeRect.right > window.innerWidth;
-           if (overlaps || clipped) {
-             badge.classList.add('overlap-hidden');
-           } else {
-             badge.classList.remove('overlap-hidden');
-           }
-         });
-       };
-     })();
+     const BADGE_BREAKPOINT = 720; // main content reflows around 700px; keep extra room for the X link
+
+     const applyVisibility = () => {
+       if (!badge.dataset.ready) { return; }
+       badge.hidden = window.innerWidth < BADGE_BREAKPOINT;
+     };
 
      const revealBadge = (text) => {
        badge.textContent = text;
-       badge.hidden = false;
-       updateVisibility();
-       window.addEventListener('resize', updateVisibility, { passive: true });
-       window.addEventListener('orientationchange', updateVisibility);
+       badge.dataset.ready = 'true';
+       applyVisibility();
+       window.addEventListener('resize', applyVisibility, { passive: true });
+       window.addEventListener('orientationchange', applyVisibility);
      };
 
      fetch('./sw.js', { cache: 'no-store' })
